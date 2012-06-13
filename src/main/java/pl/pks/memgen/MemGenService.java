@@ -1,5 +1,7 @@
 package pl.pks.memgen;
 
+import pl.pks.memgen.db.StorageService;
+import pl.pks.memgen.db.StubStorageService;
 import pl.pks.memgen.health.PlaceholderHealthCheck;
 import pl.pks.memgen.resources.PlaceholderResource;
 import com.google.common.cache.CacheBuilderSpec;
@@ -22,7 +24,9 @@ public class MemGenService extends Service<MemGenConfiguration> {
 
     @Override
     protected void initialize(MemGenConfiguration conf, Environment env) throws Exception {
-        env.addResource(new PlaceholderResource());
+        StorageService storageService = new StubStorageService();
+        env.addResource(new PlaceholderResource(storageService));
         env.addHealthCheck(new PlaceholderHealthCheck());
     }
+
 }

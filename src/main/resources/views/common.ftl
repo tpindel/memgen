@@ -1,8 +1,9 @@
+<#macro page title>
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>M3MG3N</title>
+    <title>${title?html}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="meme generator">
     <meta name="author" content="pks">
@@ -45,7 +46,7 @@
 	    <div class="row">
 	      <div class="span9">
 	      	<!-- include body here -->
-	      	Content
+	      	<#nested/>
 	      </div>
 	      <div class="span3">
 	        <h2>About Us</h2>
@@ -59,4 +60,4 @@
     <script src="/assets/bootstrap/js/bootstrap.min.js"></script>
  </body>
 </html>
-   
+</#macro>
