@@ -8,12 +8,12 @@ import pl.pks.memgen.db.StorageService;
 import pl.pks.memgen.views.GalleryView;
 import com.yammer.metrics.annotation.Timed;
 
-@Path("/placeholder")
-public class PlaceholderResource {
+@Path("/")
+public class RootResource {
 
     private final StorageService storageService;
 
-    public PlaceholderResource(StorageService storageService) {
+    public RootResource(StorageService storageService) {
         this.storageService = storageService;
     }
 
