@@ -1,10 +1,11 @@
 package pl.pks.memgen;
 
+import static com.google.common.base.Joiner.*;
 import pl.pks.memgen.db.AmazonStorageService;
 import pl.pks.memgen.db.StorageService;
 import pl.pks.memgen.health.PlaceholderHealthCheck;
 import pl.pks.memgen.resources.RootResource;
-import com.amazonaws.auth.PropertiesCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.google.common.cache.CacheBuilderSpec;
 import com.yammer.dropwizard.Service;
@@ -26,12 +27,24 @@ public class MemGenService extends Service<MemGenConfiguration> {
 
     @Override
     protected void initialize(MemGenConfiguration conf, Environment env) throws Exception {
-        AmazonS3Client amazonS3Client = new AmazonS3Client(new PropertiesCredentials(
-            MemGenService.class.getResourceAsStream("/storage.properties")));
-        // TODO: store in properties
-        amazonS3Client.setEndpoint("https://s3-eu-west-1.amazonaws.com/");
-        StorageService storageService = new AmazonStorageService(amazonS3Client);
+        StorageConfiguration storageConfiguration = conf.getStorage();
+        AmazonS3Client amazonS3Client = initializeAmazonS3Client(storageConfiguration);
+        StorageService storageService = new AmazonStorageService(amazonS3Client,
+            generatePublicUrl(storageConfiguration), storageConfiguration.getBucket());
         env.addResource(new RootResource(storageService));
         env.addHealthCheck(new PlaceholderHealthCheck());
     }
+
+    private AmazonS3Client initializeAmazonS3Client(StorageConfiguration conf) {
+        BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(conf.getAccessKey(),
+            conf.getSecretKey());
+        AmazonS3Client amazonS3Client = new AmazonS3Client(basicAWSCredentials);
+        amazonS3Client.setEndpoint(conf.getEndpoint());
+        return amazonS3Client;
+    }
+
+    private String generatePublicUrl(StorageConfiguration storage) {
+        return on('/').join(storage.getEndpoint(), storage.getBucket());
+    }
+
 }
