@@ -40,6 +40,12 @@
 			<version>${com.yammer.dropwizard.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>com.yammer.dropwizard</groupId>
+			<artifactId>dropwizard-testing</artifactId>
+			<version>${com.yammer.dropwizard.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
