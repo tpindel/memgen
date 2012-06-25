@@ -14,4 +14,10 @@ public class StubStorageService implements StorageService {
         }
         return list;
     }
+
+    @Override
+    public Meme save(String url) {
+        return new Meme("http://placehold.it/250x250");
+    }
+
 }

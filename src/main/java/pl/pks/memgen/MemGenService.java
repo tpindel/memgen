@@ -1,6 +1,5 @@
 package pl.pks.memgen;
 
-import static com.google.common.base.Joiner.on;
 import pl.pks.memgen.db.AmazonStorageService;
 import pl.pks.memgen.db.StorageService;
 import pl.pks.memgen.health.PlaceholderHealthCheck;
@@ -30,8 +29,7 @@ public class MemGenService extends Service<MemGenConfiguration> {
     protected void initialize(MemGenConfiguration conf, Environment env) throws Exception {
         StorageConfiguration storageConfiguration = conf.getStorage();
         AmazonS3Client amazonS3Client = initializeAmazonS3Client(storageConfiguration);
-        StorageService storageService = new AmazonStorageService(amazonS3Client,
-            generatePublicUrl(storageConfiguration), storageConfiguration.getBucket());
+        StorageService storageService = new AmazonStorageService(amazonS3Client, storageConfiguration);
         env.addResource(new RootResource(storageService));
         env.addResource(new EditMemResource());
         env.addHealthCheck(new PlaceholderHealthCheck());
@@ -43,10 +41,6 @@ public class MemGenService extends Service<MemGenConfiguration> {
         AmazonS3Client amazonS3Client = new AmazonS3Client(basicAWSCredentials);
         amazonS3Client.setEndpoint(conf.getEndpoint());
         return amazonS3Client;
-    }
-
-    private String generatePublicUrl(StorageConfiguration storage) {
-        return on('/').join(storage.getEndpoint(), storage.getBucket());
     }
 
 }
