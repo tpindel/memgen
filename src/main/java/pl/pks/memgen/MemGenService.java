@@ -1,9 +1,10 @@
 package pl.pks.memgen;
 
-import static com.google.common.base.Joiner.*;
+import static com.google.common.base.Joiner.on;
 import pl.pks.memgen.db.AmazonStorageService;
 import pl.pks.memgen.db.StorageService;
 import pl.pks.memgen.health.PlaceholderHealthCheck;
+import pl.pks.memgen.resources.EditMemResource;
 import pl.pks.memgen.resources.RootResource;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -32,6 +33,7 @@ public class MemGenService extends Service<MemGenConfiguration> {
         StorageService storageService = new AmazonStorageService(amazonS3Client,
             generatePublicUrl(storageConfiguration), storageConfiguration.getBucket());
         env.addResource(new RootResource(storageService));
+        env.addResource(new EditMemResource());
         env.addHealthCheck(new PlaceholderHealthCheck());
     }
 
