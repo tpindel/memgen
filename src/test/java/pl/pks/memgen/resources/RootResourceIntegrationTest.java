@@ -9,6 +9,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.representation.Form;
 import com.yammer.dropwizard.testing.ResourceTest;
+import com.yammer.dropwizard.views.ViewMessageBodyWriter;
 
 public class RootResourceIntegrationTest extends ResourceTest {
 
@@ -17,6 +18,7 @@ public class RootResourceIntegrationTest extends ResourceTest {
     @Override
     protected void setUpResources() {
         addResource(new RootResource(storage));
+        addProvider(ViewMessageBodyWriter.class);
     }
 
     @Test
@@ -28,7 +30,7 @@ public class RootResourceIntegrationTest extends ResourceTest {
         // when
         service.type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, form);
         // then
-        //TODO: verify redirect
+        // TODO: verify redirect
         verify(storage).save(anyString());
     }
 
