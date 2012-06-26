@@ -1,6 +1,7 @@
 package pl.pks.memgen.db;
 
 import static com.google.common.base.Joiner.*;
+import static com.google.common.base.Preconditions.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -13,7 +14,6 @@ import pl.pks.memgen.api.Meme;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
@@ -34,17 +34,22 @@ public class AmazonStorageService implements StorageService {
 
     @Override
     public List<Meme> findAll() {
-        ObjectListing objectListing = amazon.listObjects(new ListObjectsRequest()
-            .withBucketName(storageConfiguration.getBucket()));
+        List<S3ObjectSummary> objectSummaries = getObjectSummaries();
 
         List<Meme> memes = new ArrayList<>();
 
-        for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
-            final String url = getAmazonUrl(objectSummary.getKey());
-            memes.add(new Meme(url));
+        for (S3ObjectSummary objectSummary : objectSummaries) {
+            String key = objectSummary.getKey();
+            final String url = getAmazonUrl(key);
+            memes.add(new Meme(key, url));
             LOG.info("Generated URL: {}", url);
         }
         return memes;
+    }
+
+    private List<S3ObjectSummary> getObjectSummaries() {
+        return amazon.listObjects(new ListObjectsRequest()
+            .withBucketName(storageConfiguration.getBucket())).getObjectSummaries();
     }
 
     private String getAmazonUrl(String key) {
@@ -71,7 +76,7 @@ public class AmazonStorageService implements StorageService {
             amazon.putObject(request);
             LOG.info("{} saved", url);
 
-            return new Meme(getAmazonUrl(key));
+            return new Meme(key, getAmazonUrl(key));
 
         } catch (IOException e) {
             LOG.error(e, "Could not download file while downloading {}", url);
@@ -89,4 +94,16 @@ public class AmazonStorageService implements StorageService {
         return UUID.randomUUID().toString() + url.substring(url.length() - 4);
     }
 
+    public Meme findOne(String id) {
+        checkNotNull(id, "meme id can't be null");
+
+        List<S3ObjectSummary> objectSummaries = getObjectSummaries();
+        for (S3ObjectSummary objectSummary : objectSummaries) {
+            String key = objectSummary.getKey();
+            if (id.equals(key)) {
+                return new Meme(id, getAmazonUrl(key));
+            }
+        }
+        return null;
+    }
 }

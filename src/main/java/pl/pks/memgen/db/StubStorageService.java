@@ -10,14 +10,19 @@ public class StubStorageService implements StorageService {
     public List<Meme> findAll() {
         List<Meme> list = new ArrayList<>();
         for (int i = 0; i < 12; i++) {
-            list.add(new Meme("http://placehold.it/250x250"));
+            list.add(new Meme("123", "http://placehold.it/250x250"));
         }
         return list;
     }
 
     @Override
     public Meme save(String url) {
-        return new Meme("http://placehold.it/250x250");
+        return new Meme("123", "http://placehold.it/250x250");
+    }
+
+    @Override
+    public Meme findOne(String id) {
+        return new Meme("123", "http://placehold.it/250x250");
     }
 
 }
