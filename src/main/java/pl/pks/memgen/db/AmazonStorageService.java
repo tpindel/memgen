@@ -4,9 +4,10 @@ import static com.google.common.base.Joiner.*;
 import static com.google.common.base.Preconditions.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import pl.pks.memgen.StorageConfiguration;
@@ -63,35 +64,68 @@ public class AmazonStorageService implements StorageService {
     @Override
     public Meme save(String url) {
         try {
-            URLConnection urlConnection = new URL(url).openConnection();
-
+            HttpURLConnection urlConnection = doHEADRequest(url);
+            checkContentType(urlConnection);
+            checkContentSize(urlConnection);
+            ObjectMetadata objectMetadata = getObjectMetadata(urlConnection.getContentLengthLong());
+            
+            InputStream inputStream = doGETRequest(url).getInputStream();
+            
             String bucket = storageConfiguration.getBucket();
             String key = generateRandomKeyWithExtension(url);
-            InputStream inputStream = urlConnection.getInputStream();
-            ObjectMetadata objectMetadata = getObjectMetada(urlConnection.getContentLengthLong());
-
+            
             PutObjectRequest request = new PutObjectRequest(bucket, key, inputStream, objectMetadata);
             request.setCannedAcl(CannedAccessControlList.PublicRead);
 
             amazon.putObject(request);
-            LOG.info("{} saved", url);
+            LOG.info("{} saved as {}", url, getAmazonUrl(key));
 
             return new Meme(key, getAmazonUrl(key));
 
         } catch (IOException e) {
             LOG.error(e, "Could not download file while downloading {}", url);
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
     }
 
-    private ObjectMetadata getObjectMetada(long contentLength) {
+    private void checkContentSize(HttpURLConnection urlConnection) throws IOException {
+        long contentLength = urlConnection.getContentLengthLong();
+        if (contentLength <= 0) {
+            LOG.info("Invalid content length {}", contentLength);
+            throw new IllegalArgumentException();
+        }
+    }
+
+    private void checkContentType(HttpURLConnection urlConnection) throws IOException {
+        String contentType = urlConnection.getContentType();
+        boolean valid = Arrays.asList("image/jpeg", "image/png").contains(contentType);
+        if (!valid) {
+            LOG.info("Invalid content type {}", contentType);
+            throw new IllegalArgumentException();
+        }
+    }
+
+    private HttpURLConnection doHEADRequest(String url) throws IOException {
+        HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
+        urlConnection.setRequestMethod("HEAD");
+        urlConnection.connect();
+        return urlConnection;
+    }
+
+    private HttpURLConnection doGETRequest(String url) throws IOException {
+        HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
+        urlConnection.connect();
+        return urlConnection;
+    }
+
+    private ObjectMetadata getObjectMetadata(long contentLength) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(contentLength);
         return objectMetadata;
     }
 
-    private String generateRandomKeyWithExtension(String url) {
-        return UUID.randomUUID().toString() + url.substring(url.length() - 4);
+    private String generateRandomKeyWithExtension(String filename) {
+        return UUID.randomUUID().toString() + filename.substring(filename.length() - 4);
     }
 
     public Meme findOne(String id) {
@@ -106,4 +140,5 @@ public class AmazonStorageService implements StorageService {
         }
         return null;
     }
+
 }
