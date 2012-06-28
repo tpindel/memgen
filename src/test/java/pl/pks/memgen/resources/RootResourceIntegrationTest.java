@@ -25,7 +25,7 @@ public class RootResourceIntegrationTest extends ResourceTest {
     public void shouldPersistImageFromLink() throws Exception {
         // given
         WebResource service = client().resource("/upload");
-        final String url = "http://i1.kym-cdn.com/entries/icons/original/000/003/619/Untitled-1.jpg";
+        final String url = "https://dl.dropbox.com/u/1114182/memgen/philosoraptor.jpg";
         Form form = getFormFixutre(url);
         // when
         service.type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, form);
