@@ -24,7 +24,8 @@ public class EditMemResource {
     @Timed
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public String generateMem(@FormParam("topTitle") String topTitle, @FormParam("bottomTitle") String bottomTitle) {
+    public String generateMem(@QueryParam("memUrl") String memUrl, @FormParam("topTitle") String topTitle,
+                              @FormParam("bottomTitle") String bottomTitle) {
 
         return "TODO";
     }
