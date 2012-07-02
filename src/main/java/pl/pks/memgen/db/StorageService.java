@@ -8,4 +8,6 @@ public interface StorageService {
     List<Meme> findAll();
 
     Meme save(String url);
+
+    Meme findOne(String id);
 }

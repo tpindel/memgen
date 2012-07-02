@@ -5,11 +5,18 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class Meme {
 
     @JsonProperty
+    private final String id;
+
+    @JsonProperty
     private final String url;
 
-    public Meme(@JsonProperty("url") String url) {
+    public Meme(@JsonProperty("id") String id, @JsonProperty("url") String url) {
+        this.id = id;
         this.url = url;
+    }
 
+    public String getId() {
+        return id;
     }
 
     public String getUrl() {

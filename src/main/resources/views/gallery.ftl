@@ -3,7 +3,7 @@
     <ul class="thumbnails" id="memeList">
         <#list memes as item>
         <li class="span2">
-          <a href="/edit?memUrl=${item.url}" class="thumbnail">
+          <a href="/edit/${item.id}" class="thumbnail">
             <img src="${item.url}" alt="">
           </a>
         </li>
