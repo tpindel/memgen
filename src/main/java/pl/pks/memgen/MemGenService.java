@@ -3,6 +3,7 @@ package pl.pks.memgen;
 import pl.pks.memgen.db.AmazonStorageService;
 import pl.pks.memgen.db.StorageService;
 import pl.pks.memgen.health.PlaceholderHealthCheck;
+import pl.pks.memgen.io.ImageFromUrlUploader;
 import pl.pks.memgen.resources.EditResource;
 import pl.pks.memgen.resources.RootResource;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -30,7 +31,7 @@ public class MemGenService extends Service<MemGenConfiguration> {
         StorageConfiguration storageConfiguration = conf.getStorage();
         AmazonS3Client amazonS3Client = initializeAmazonS3Client(storageConfiguration);
         StorageService storageService = new AmazonStorageService(amazonS3Client, storageConfiguration);
-        env.addResource(new RootResource(storageService));
+        env.addResource(new RootResource(storageService, new ImageFromUrlUploader(storageService)));
         env.addResource(new EditResource(storageService));
         env.addHealthCheck(new PlaceholderHealthCheck());
     }

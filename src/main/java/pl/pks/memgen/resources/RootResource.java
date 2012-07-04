@@ -8,6 +8,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import pl.pks.memgen.db.StorageService;
+import pl.pks.memgen.io.ImageFromUrlUploader;
 import pl.pks.memgen.views.GalleryView;
 import pl.pks.memgen.views.UploadFormView;
 import com.yammer.dropwizard.logging.Log;
@@ -20,9 +21,11 @@ public class RootResource {
     private static final Log LOG = Log.forClass(RootResource.class);
 
     private final StorageService storageService;
+    private final ImageFromUrlUploader imageUploader;
 
-    public RootResource(StorageService storageService) {
+    public RootResource(StorageService storageService, ImageFromUrlUploader imageUploader) {
         this.storageService = storageService;
+        this.imageUploader = imageUploader;
     }
 
     @Timed
@@ -44,8 +47,8 @@ public class RootResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public UploadFormView uploadNewMeme(@FormParam("url") String url) {
 
-        storageService.save(url);
-        
+        imageUploader.upload(url);
+
         return new UploadFormView();
     }
 }

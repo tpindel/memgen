@@ -1,10 +1,15 @@
 package pl.pks.memgen.resources;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import java.io.InputStream;
 import javax.ws.rs.core.MediaType;
 import org.junit.Test;
 import pl.pks.memgen.db.StorageService;
+import pl.pks.memgen.io.ImageFromUrlUploader;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.representation.Form;
@@ -17,7 +22,7 @@ public class RootResourceIntegrationTest extends ResourceTest {
 
     @Override
     protected void setUpResources() {
-        addResource(new RootResource(storage));
+        addResource(new RootResource(storage, new ImageFromUrlUploader(storage)));
         addProvider(ViewMessageBodyWriter.class);
     }
 
@@ -31,7 +36,7 @@ public class RootResourceIntegrationTest extends ResourceTest {
         service.type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, form);
         // then
         // TODO: verify redirect
-        verify(storage).save(anyString());
+        verify(storage).save(anyString(), any(ObjectMetadata.class), any(InputStream.class));
     }
 
     private Form getFormFixutre(String url) {
