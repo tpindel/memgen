@@ -6,3 +6,5 @@ storage:
     secretKey:
     bucket: memgen
     endpoint: https://s3-eu-west-1.amazonaws.com
+upload:
+    maxSize: 5242880

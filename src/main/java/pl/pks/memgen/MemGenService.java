@@ -29,9 +29,12 @@ public class MemGenService extends Service<MemGenConfiguration> {
     @Override
     protected void initialize(MemGenConfiguration conf, Environment env) throws Exception {
         StorageConfiguration storageConfiguration = conf.getStorage();
+        UploadConfiguration uploadConfiguration = conf.getUpload();
+
         AmazonS3Client amazonS3Client = initializeAmazonS3Client(storageConfiguration);
         StorageService storageService = new AmazonStorageService(amazonS3Client, storageConfiguration);
-        env.addResource(new RootResource(storageService, new ImageFromUrlUploader(storageService)));
+
+        env.addResource(new RootResource(storageService, new ImageFromUrlUploader(storageService, uploadConfiguration)));
         env.addResource(new EditResource(storageService));
         env.addHealthCheck(new PlaceholderHealthCheck());
     }

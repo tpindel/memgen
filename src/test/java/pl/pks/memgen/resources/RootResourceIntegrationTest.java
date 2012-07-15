@@ -1,12 +1,11 @@
 package pl.pks.memgen.resources;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 import java.io.InputStream;
 import javax.ws.rs.core.MediaType;
 import org.junit.Test;
+import pl.pks.memgen.UploadConfiguration;
 import pl.pks.memgen.db.StorageService;
 import pl.pks.memgen.io.ImageFromUrlUploader;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -22,7 +21,7 @@ public class RootResourceIntegrationTest extends ResourceTest {
 
     @Override
     protected void setUpResources() {
-        addResource(new RootResource(storage, new ImageFromUrlUploader(storage)));
+        addResource(new RootResource(storage, new ImageFromUrlUploader(storage, new UploadConfiguration())));
         addProvider(ViewMessageBodyWriter.class);
     }
 

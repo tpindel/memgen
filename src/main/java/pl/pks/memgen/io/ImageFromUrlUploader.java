@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
+import pl.pks.memgen.UploadConfiguration;
 import pl.pks.memgen.api.Meme;
 import pl.pks.memgen.db.StorageService;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -15,9 +16,11 @@ public class ImageFromUrlUploader implements ImageUploader {
     private static final Log LOG = Log.forClass(ImageFromUrlUploader.class);
 
     private final StorageService storageService;
+    private final UploadConfiguration configuration;
 
-    public ImageFromUrlUploader(StorageService storageService) {
+    public ImageFromUrlUploader(StorageService storageService, UploadConfiguration configuration) {
         this.storageService = storageService;
+        this.configuration = configuration;
     }
 
     @Override
@@ -32,17 +35,16 @@ public class ImageFromUrlUploader implements ImageUploader {
 
             return storageService.save(url, objectMetadata, inputStream);
 
-        } catch (IOException e) {
-            LOG.error(e, "Could not download file while downloading {}", url);
-            throw new RuntimeException(e);
+        } catch (IOException | IllegalArgumentException e) {
+            LOG.error(e, "Could not download file {}", url);
+            throw new ImageDownloadException(e);
         }
     }
 
     private void checkContentSize(HttpURLConnection urlConnection) throws IOException {
         long contentLength = urlConnection.getContentLengthLong();
-        if (contentLength <= 0) {
-            LOG.info("Invalid content length {}", contentLength);
-            throw new IllegalArgumentException();
+        if (contentLength <= 0 || contentLength > configuration.getMaxSize()) {
+            throw new IllegalArgumentException(String.format("Invalid content length %s", contentLength));
         }
     }
 
@@ -50,8 +52,7 @@ public class ImageFromUrlUploader implements ImageUploader {
         String contentType = urlConnection.getContentType();
         boolean valid = Arrays.asList("image/jpeg", "image/png").contains(contentType);
         if (!valid) {
-            LOG.info("Invalid content type {}", contentType);
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(String.format("Invalid content type %s", contentType));
         }
     }
 

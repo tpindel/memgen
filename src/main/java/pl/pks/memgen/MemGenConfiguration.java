@@ -15,6 +15,10 @@ public class MemGenConfiguration extends Configuration {
     @JsonProperty
     private StorageConfiguration storage = new StorageConfiguration();
 
+    @NotNull
+    @JsonProperty
+    private UploadConfiguration upload = new UploadConfiguration();
+
     public StorageConfiguration getStorage() {
         return storage;
     }
@@ -22,4 +26,9 @@ public class MemGenConfiguration extends Configuration {
     public String getPlaceholder() {
         return placeholder;
     }
+
+    public UploadConfiguration getUpload() {
+        return upload;
+    }
+
 }

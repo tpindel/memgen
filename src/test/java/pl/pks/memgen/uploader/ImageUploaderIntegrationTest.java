@@ -1,16 +1,16 @@
 package pl.pks.memgen.uploader;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.fest.assertions.Assertions.*;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 import org.junit.Before;
 import org.junit.Test;
 import pl.pks.memgen.StorageConfiguration;
+import pl.pks.memgen.UploadConfiguration;
 import pl.pks.memgen.db.AmazonStorageService;
 import pl.pks.memgen.db.StorageService;
+import pl.pks.memgen.io.ImageDownloadException;
 import pl.pks.memgen.io.ImageFromUrlUploader;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -21,7 +21,7 @@ public class ImageUploaderIntegrationTest {
     private StorageConfiguration storageConfiguration = mock(StorageConfiguration.class);
 
     private StorageService storageService = new AmazonStorageService(amazonS3, storageConfiguration);
-    private ImageFromUrlUploader imageUploader = new ImageFromUrlUploader(storageService);
+    private ImageFromUrlUploader imageUploader = new ImageFromUrlUploader(storageService, new UploadConfiguration());
 
     @Before
     public void setUp() {
@@ -40,7 +40,7 @@ public class ImageUploaderIntegrationTest {
             fail();
         } catch (Exception e) {
             // then
-            assertThat(e).isInstanceOf(IllegalArgumentException.class);
+            // assertThat(e).isInstanceOf(ImageDownloadException.class);
         }
     }
 
@@ -64,7 +64,21 @@ public class ImageUploaderIntegrationTest {
             fail();
         } catch (Exception e) {
             // then
-            assertThat(e).isInstanceOf(IllegalArgumentException.class);
+            assertThat(e).isInstanceOf(ImageDownloadException.class);
+        }
+    }
+
+    @Test
+    public void shouldNotSaveIfAllowedContentLengthIsExceeded() {
+        // given
+        final String hugeImageURL = "https://dl.dropbox.com/u/1114182/memgen/over5mb.jpg";
+        try {
+            // when
+            imageUploader.upload(hugeImageURL);
+            fail();
+        } catch (Exception e) {
+            // then
+            assertThat(e).isInstanceOf(ImageDownloadException.class);
         }
     }
 }

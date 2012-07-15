@@ -8,10 +8,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import pl.pks.memgen.db.StorageService;
+import pl.pks.memgen.io.ImageDownloadException;
 import pl.pks.memgen.io.ImageFromUrlUploader;
 import pl.pks.memgen.views.GalleryView;
+import pl.pks.memgen.views.InvalidView;
 import pl.pks.memgen.views.UploadFormView;
 import com.yammer.dropwizard.logging.Log;
+import com.yammer.dropwizard.views.View;
 import com.yammer.metrics.annotation.Timed;
 
 @Produces(MediaType.TEXT_HTML)
@@ -45,10 +48,15 @@ public class RootResource {
     @POST
     @Path("upload")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public UploadFormView uploadNewMeme(@FormParam("url") String url) {
+    public View uploadNewMeme(@FormParam("url") String url) {
 
-        imageUploader.upload(url);
+        try {
+            imageUploader.upload(url);
+            return new UploadFormView();
 
-        return new UploadFormView();
+        } catch (ImageDownloadException e) {
+            return new InvalidView();
+        }
+
     }
 }
