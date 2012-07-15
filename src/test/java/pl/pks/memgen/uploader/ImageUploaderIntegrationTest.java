@@ -40,7 +40,7 @@ public class ImageUploaderIntegrationTest {
             fail();
         } catch (Exception e) {
             // then
-            // assertThat(e).isInstanceOf(ImageDownloadException.class);
+            assertThat(e).isInstanceOf(ImageDownloadException.class);
         }
     }
 
