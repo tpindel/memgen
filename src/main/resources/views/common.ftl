@@ -28,11 +28,11 @@
 	          <span class="icon-bar"></span>
 	          <span class="icon-bar"></span>
 	        </a>
-	        <a class="brand" href="#">memgen</a>
+	        <a class="brand" href="/">memgen</a>
 	        <div class="nav-collapse">
 	          <ul class="nav">
 	             <li class="active">
-	             	<a href="#">Home</a>
+	             	<a href="/upload">Upload</a>
   				 </li>
 				 <li><a href="#">Link</a></li>
 				 <li><a href="#">Link</a></li>
