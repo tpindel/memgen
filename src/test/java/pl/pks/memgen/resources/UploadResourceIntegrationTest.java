@@ -1,27 +1,27 @@
 package pl.pks.memgen.resources;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import java.io.InputStream;
+import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import javax.ws.rs.core.MediaType;
 import org.junit.Test;
-import pl.pks.memgen.UploadConfiguration;
-import pl.pks.memgen.db.StorageService;
+import pl.pks.memgen.api.Meme;
 import pl.pks.memgen.io.ImageFromUrlUploader;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.representation.Form;
 import com.yammer.dropwizard.testing.ResourceTest;
 import com.yammer.dropwizard.views.ViewMessageBodyWriter;
 
-public class RootResourceIntegrationTest extends ResourceTest {
+public class UploadResourceIntegrationTest extends ResourceTest {
 
-    private StorageService storage = mock(StorageService.class);
+    private ImageFromUrlUploader uploader = mock(ImageFromUrlUploader.class);
 
     @Override
     protected void setUpResources() {
-        addResource(new RootResource(storage, new ImageFromUrlUploader(storage, new UploadConfiguration())));
+        addResource(new UploadResource(uploader));
         addProvider(ViewMessageBodyWriter.class);
     }
 
@@ -31,11 +31,17 @@ public class RootResourceIntegrationTest extends ResourceTest {
         WebResource service = client().resource("/upload");
         final String url = "https://dl.dropbox.com/u/1114182/memgen/philosoraptor.jpg";
         Form form = getFormFixutre(url);
+        given(uploader.upload(anyString())).willReturn(getMemeFixture());
         // when
-        service.type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, form);
+        ClientResponse post = service.type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, form);
         // then
-        // TODO: verify redirect
-        verify(storage).save(anyString(), any(ObjectMetadata.class), any(InputStream.class));
+        String locationHeader = post.getHeaders().getFirst("location");
+        assertThat(locationHeader).contains("/edit/foo.jpg");
+        verify(uploader).upload(anyString());
+    }
+
+    private Meme getMemeFixture() {
+        return new Meme("foo.jpg", "http://bar/");
     }
 
     private Form getFormFixutre(String url) {
