@@ -1,12 +1,12 @@
 package pl.pks.memgen;
 
-import pl.pks.memgen.db.AmazonStorageService;
-import pl.pks.memgen.db.StorageService;
+import pl.pks.memgen.db.AmazonFigureStorageService;
+import pl.pks.memgen.db.FigureStorageService;
 import pl.pks.memgen.health.PlaceholderHealthCheck;
-import pl.pks.memgen.io.ImageFromUrlUploader;
-import pl.pks.memgen.resources.EditResource;
+import pl.pks.memgen.io.FigureUploader;
+import pl.pks.memgen.resources.MemeResource;
+import pl.pks.memgen.resources.FigureResource;
 import pl.pks.memgen.resources.RootResource;
-import pl.pks.memgen.resources.UploadResource;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.google.common.cache.CacheBuilderSpec;
@@ -33,13 +33,13 @@ public class MemGenService extends Service<MemGenConfiguration> {
         UploadConfiguration uploadConfiguration = conf.getUpload();
 
         AmazonS3Client amazonS3Client = initializeAmazonS3Client(storageConfiguration);
-        StorageService storageService = new AmazonStorageService(amazonS3Client, storageConfiguration);
+        FigureStorageService storageService = new AmazonFigureStorageService(amazonS3Client, storageConfiguration);
 
-        ImageFromUrlUploader imageUploader = new ImageFromUrlUploader(storageService, uploadConfiguration);
+        FigureUploader figureUploader = new FigureUploader(storageService, uploadConfiguration);
 
-        env.addResource(new EditResource(storageService));
-        env.addResource(new UploadResource(imageUploader));
-        env.addResource(new RootResource(storageService));
+        env.addResource(new MemeResource(storageService));
+        env.addResource(new FigureResource(storageService, figureUploader));
+        env.addResource(new RootResource());
         env.addHealthCheck(new PlaceholderHealthCheck());
     }
 
