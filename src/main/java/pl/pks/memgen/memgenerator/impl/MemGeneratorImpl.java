@@ -37,7 +37,8 @@ public class MemGeneratorImpl implements MemGenerator {
         operation.fill("white");
         operation.pointsize(50);
         operation.annotate(0, 0, 0, 0, captionedMeme.getBottomTitle());
-        operation.addImage("/tmp/generatedmeme.jpg");
+        String generatedMemPath = "/tmp/" + captionedMeme.getId();
+        operation.addImage(generatedMemPath);
 
         ConvertCmd cmd = new ConvertCmd();
         try {
@@ -46,9 +47,7 @@ public class MemGeneratorImpl implements MemGenerator {
             throw new RuntimeException(e);
         }
 
-        // TODO: persist in amazon storageService.save(meme.getUrl(), objectMetadata, inputStream);
-
-        return imagePath;
+        return captionedMeme.getId();
     }
 
 }
