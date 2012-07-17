@@ -1,8 +1,8 @@
 package pl.pks.memgen.memgenerator;
 
-import pl.pks.memgen.api.CaptionedMeme;
+import pl.pks.memgen.api.Meme;
 
 public interface MemGenerator {
 
-    String generate(CaptionedMeme meme);
+    String generate(Meme meme);
 }

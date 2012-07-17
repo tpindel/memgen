@@ -1,14 +1,15 @@
 package pl.pks.memgen;
 
-import pl.pks.memgen.db.AmazonStorageService;
-import pl.pks.memgen.db.StorageService;
+import pl.pks.memgen.db.AmazonFigureStorageService;
+import pl.pks.memgen.db.FigureStorageService;
 import pl.pks.memgen.health.PlaceholderHealthCheck;
+import pl.pks.memgen.io.FigureUploader;
 import pl.pks.memgen.io.ImageDownloader;
 import pl.pks.memgen.io.ImageFromUrlDownloader;
-import pl.pks.memgen.io.ImageFromUrlUploader;
 import pl.pks.memgen.memgenerator.MemGenerator;
 import pl.pks.memgen.memgenerator.impl.MemGeneratorImpl;
-import pl.pks.memgen.resources.EditResource;
+import pl.pks.memgen.resources.FigureResource;
+import pl.pks.memgen.resources.MemeResource;
 import pl.pks.memgen.resources.RootResource;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -33,12 +34,16 @@ public class MemGenService extends Service<MemGenConfiguration> {
     @Override
     protected void initialize(MemGenConfiguration conf, Environment env) throws Exception {
         StorageConfiguration storageConfiguration = conf.getStorage();
+        UploadConfiguration uploadConfiguration = conf.getUpload();
+
         AmazonS3Client amazonS3Client = initializeAmazonS3Client(storageConfiguration);
-        StorageService storageService = new AmazonStorageService(amazonS3Client, storageConfiguration);
         ImageDownloader imageDownloader = new ImageFromUrlDownloader();
+        FigureStorageService storageService = new AmazonFigureStorageService(amazonS3Client, storageConfiguration);
+        FigureUploader figureUploader = new FigureUploader(storageService, uploadConfiguration);
         MemGenerator memGenerator = new MemGeneratorImpl(imageDownloader, storageService);
-        env.addResource(new RootResource(storageService, new ImageFromUrlUploader(storageService)));
-        env.addResource(new EditResource(storageService, memGenerator));
+        env.addResource(new MemeResource(storageService, memGenerator));
+        env.addResource(new FigureResource(storageService, figureUploader));
+        env.addResource(new RootResource());
         env.addHealthCheck(new PlaceholderHealthCheck());
     }
 

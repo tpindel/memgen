@@ -8,21 +8,21 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import pl.pks.memgen.api.CaptionedMeme;
+import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.api.Meme;
-import pl.pks.memgen.db.StorageService;
+import pl.pks.memgen.db.FigureStorageService;
 import pl.pks.memgen.memgenerator.MemGenerator;
-import pl.pks.memgen.views.EditView;
 import pl.pks.memgen.views.GeneratedMemView;
+import pl.pks.memgen.views.meme.NewMemeView;
 import com.yammer.metrics.annotation.Timed;
 
-@Path("/edit/{id}")
-public class EditResource {
+@Path("/meme/{id}")
+public class MemeResource {
 
-    private final StorageService storageService;
+    private final FigureStorageService storageService;
     private final MemGenerator memGenerator;
 
-    public EditResource(StorageService storageService, MemGenerator memGenerator) {
+    public MemeResource(FigureStorageService storageService, MemGenerator memGenerator) {
         this.storageService = storageService;
         this.memGenerator = memGenerator;
     }
@@ -30,9 +30,9 @@ public class EditResource {
     @Timed
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public EditView editMeme(@PathParam("id") String id) {
-        Meme meme = storageService.findOne(id);
-        return new EditView(meme.getId(), meme.getUrl());
+    public NewMemeView newMeme(@PathParam("id") String id) {
+        Figure figure = storageService.findOne(id);
+        return new NewMemeView(figure.getId(), figure.getUrl());
     }
 
     @Timed
@@ -41,7 +41,7 @@ public class EditResource {
     public GeneratedMemView generateMeme(@PathParam("id") String id, @FormParam("topTitle") String topTitle,
                                          @FormParam("bottomTitle") String bottomTitle) {
 
-        String generatedMemImageFilePath = memGenerator.generate(new CaptionedMeme(id, null, topTitle, bottomTitle));
+        String generatedMemImageFilePath = memGenerator.generate(new Meme(id, null, topTitle, bottomTitle));
 
         return new GeneratedMemView("localhost:8080/display/" + generatedMemImageFilePath);
     }

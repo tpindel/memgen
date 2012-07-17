@@ -4,26 +4,26 @@ import java.io.IOException;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
-import pl.pks.memgen.api.CaptionedMeme;
+import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.api.Meme;
-import pl.pks.memgen.db.StorageService;
+import pl.pks.memgen.db.FigureStorageService;
 import pl.pks.memgen.io.ImageDownloader;
 import pl.pks.memgen.memgenerator.MemGenerator;
 
 public class MemGeneratorImpl implements MemGenerator {
 
     private final ImageDownloader imageDownloader;
-    private final StorageService storageService;
+    private final FigureStorageService storageService;
 
-    public MemGeneratorImpl(ImageDownloader imageDownloader, StorageService storageService) {
+    public MemGeneratorImpl(ImageDownloader imageDownloader, FigureStorageService storageService) {
         this.imageDownloader = imageDownloader;
         this.storageService = storageService;
     }
 
     @Override
-    public String generate(CaptionedMeme captionedMeme) {
-        Meme meme = storageService.findOne(captionedMeme.getId());
-        String imagePath = imageDownloader.download(meme.getUrl(), meme.getId());
+    public String generate(Meme meme) {
+        Figure figure = storageService.findOne(meme.getId());
+        String imagePath = imageDownloader.download(figure.getUrl(), figure.getId());
 
         IMOperation operation = new IMOperation();
         operation.addImage(imagePath);
@@ -31,14 +31,16 @@ public class MemGeneratorImpl implements MemGenerator {
         operation.font("Comic Sans MS");
         operation.fill("white");
         operation.pointsize(50);
-        operation.annotate(0, 0, 0, 0, captionedMeme.getTopTitle());
+        operation.annotate(0, 0, 0, 0, meme.getTopTitle());
         operation.gravity("south");
         operation.font("Comic Sans MS");
         operation.fill("white");
         operation.pointsize(50);
-        operation.annotate(0, 0, 0, 0, captionedMeme.getBottomTitle());
-        String generatedMemPath = "/tmp/" + captionedMeme.getId();
+        operation.annotate(0, 0, 0, 0, meme.getBottomTitle());
+        String generatedMemPath = "/tmp/" + meme.getId();
         operation.addImage(generatedMemPath);
+        operation.annotate(0, 0, 0, 0, meme.getBottomTitle());
+        operation.addImage("/tmp/generatedmeme.jpg");
 
         ConvertCmd cmd = new ConvertCmd();
         try {
@@ -47,7 +49,7 @@ public class MemGeneratorImpl implements MemGenerator {
             throw new RuntimeException(e);
         }
 
-        return captionedMeme.getId();
+        return meme.getId();
     }
 
 }

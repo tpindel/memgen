@@ -2,7 +2,9 @@ placeholder: MemGen
 http: 
     shutdownGracePeriod: 0s
 storage:
-    accessKey: AKIAJBTTKM7UUUC62PWQ
-    secretKey: K2nw1TIdRDtvTl5Kh5y0zppRpRE5Z9yyIzVQ2EsS
+    accessKey:
+    secretKey:
     bucket: memgen
     endpoint: https://s3-eu-west-1.amazonaws.com
+upload:
+    maxSize: 5242880

@@ -1,23 +1,21 @@
-package pl.pks.memgen.uploader;
+package pl.pks.memgen.io;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.fest.assertions.Assertions.*;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 import org.junit.Before;
 import org.junit.Test;
 import pl.pks.memgen.StorageConfiguration;
 import pl.pks.memgen.UploadConfiguration;
 import pl.pks.memgen.db.AmazonFigureStorageService;
 import pl.pks.memgen.db.FigureStorageService;
-import pl.pks.memgen.io.FigureUploader;
 import pl.pks.memgen.io.ImageDownloadException;
+import pl.pks.memgen.io.FigureUploader;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
-public class ImageUploaderIntegrationTest {
+public class FigureUploaderIntegrationTest {
 
     private AmazonS3 amazonS3 = mock(AmazonS3.class);
     private StorageConfiguration storageConfiguration = mock(StorageConfiguration.class);
