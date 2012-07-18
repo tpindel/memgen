@@ -40,9 +40,8 @@ public class MemeResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public GeneratedMemView generateMeme(@PathParam("id") String id, @FormParam("topTitle") String topTitle,
                                          @FormParam("bottomTitle") String bottomTitle) {
-
         String generatedMemImageFilePath = memGenerator.generate(new Meme(id, null, topTitle, bottomTitle));
 
-        return new GeneratedMemView("localhost:8080/display/" + generatedMemImageFilePath);
+        return new GeneratedMemView(generatedMemImageFilePath);
     }
 }

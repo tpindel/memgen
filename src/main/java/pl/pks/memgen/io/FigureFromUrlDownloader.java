@@ -1,23 +1,19 @@
 package pl.pks.memgen.io;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import org.apache.commons.io.FileUtils;
 
-public class ImageFromUrlDownloader implements ImageDownloader {
+public class FigureFromUrlDownloader implements FigureDownloader {
 
     @Override
-    public String download(String imageUrl, String imageId) {
+    public InputStream download(String imageUrl) {
         try {
             URLConnection uc = setupConnection(imageUrl);
 
             InputStream input = uc.getInputStream();
-            File destination = File.createTempFile(imageId, null);
-            FileUtils.copyInputStreamToFile(input, destination);
-            return destination.getAbsolutePath();
+            return input;
         } catch (IOException e) {
             throw new ImageDownloadException(e);
         }
