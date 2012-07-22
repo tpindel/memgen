@@ -32,7 +32,7 @@
 	        <div class="nav-collapse">
 	          <ul class="nav">
 	             <li class="active">
-	             	<a href="/upload">Upload</a>
+	             	<a href="/figure/new">Upload</a>
   				 </li>
 				 <li><a href="#">Link</a></li>
 				 <li><a href="#">Link</a></li>

@@ -1,5 +1,6 @@
 package pl.pks.memgen.resources;
 
+import java.io.InputStream;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -14,7 +15,13 @@ import pl.pks.memgen.db.FigureStorageService;
 import pl.pks.memgen.io.FigureUploader;
 import pl.pks.memgen.io.ImageDownloadException;
 import pl.pks.memgen.views.figure.AllFigureView;
+import pl.pks.memgen.views.figure.InvalidFigureView;
+import pl.pks.memgen.views.figure.NewFigureFromDisk;
 import pl.pks.memgen.views.figure.NewFigureView;
+import com.sun.jersey.multipart.FormDataBodyPart;
+import com.sun.jersey.multipart.FormDataParam;
+import com.yammer.dropwizard.logging.Log;
+import com.yammer.dropwizard.views.View;
 import com.yammer.metrics.annotation.Timed;
 
 @Produces(MediaType.TEXT_HTML)
@@ -37,7 +44,7 @@ public class FigureResource {
 
     @Timed
     @GET
-    @Path("/figure/new")
+    @Path("/new")
     public NewFigureView newFigure() {
         return new NewFigureView();
     }
@@ -45,13 +52,45 @@ public class FigureResource {
     @Timed
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response uploadNewMeme(@FormParam("url") String url) {
+    public Response addNewFigure(@FormParam("url") String url) {
         try {
-            Figure uploaded = figureUploader.upload(url);
+            Figure uploaded = figureUploader.fromLink(url);
             return Response.seeOther(UriBuilder.fromResource(MemeResource.class).build(uploaded.getId())).build();
         } catch (ImageDownloadException e) {
-            return Response.status(500).build();
+            return redirectToErrorPage();
         }
 
+    }
+
+    private Response redirectToErrorPage() {
+        return Response.seeOther(UriBuilder.fromPath("/figure/invalid").build()).build();
+    }
+
+    @Timed
+    @GET
+    @Path("/fromDisk")
+    public NewFigureFromDisk newFigureFromDisk() {
+        return new NewFigureFromDisk();
+    }
+
+    @Timed
+    @POST
+    @Path("/fromDisk")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response addNewFigureFromDisk(@FormDataParam("file") InputStream fileInputStream,
+                                         @FormDataParam("file") FormDataBodyPart bodyPart) {
+        try {
+            Figure uploaded = figureUploader.fromDisk(fileInputStream, bodyPart.getMediaType()
+                .toString());
+            return Response.seeOther(UriBuilder.fromResource(MemeResource.class).build(uploaded.getId())).build();
+        } catch (ImageDownloadException e) {
+            return redirectToErrorPage();
+        }
+    }
+
+    @GET
+    @Path("/invalid")
+    public View showInvalidMessage() {
+        return new InvalidFigureView();
     }
 }

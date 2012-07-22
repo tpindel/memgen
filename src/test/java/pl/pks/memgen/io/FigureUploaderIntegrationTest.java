@@ -1,27 +1,29 @@
 package pl.pks.memgen.io;
 
-import static org.fest.assertions.Assertions.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.BDDMockito;
 import pl.pks.memgen.StorageConfiguration;
 import pl.pks.memgen.UploadConfiguration;
-import pl.pks.memgen.db.AmazonFigureStorageService;
 import pl.pks.memgen.db.FigureStorageService;
-import pl.pks.memgen.io.ImageDownloadException;
-import pl.pks.memgen.io.FigureUploader;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 
 public class FigureUploaderIntegrationTest {
 
-    private AmazonS3 amazonS3 = mock(AmazonS3.class);
     private StorageConfiguration storageConfiguration = mock(StorageConfiguration.class);
+    private UploadConfiguration uploadConfiguration = mock(UploadConfiguration.class);
 
-    private FigureStorageService storageService = new AmazonFigureStorageService(amazonS3, storageConfiguration);
-    private FigureUploader figureUploader = new FigureUploader(storageService, new UploadConfiguration());
+    private FigureStorageService storageService = mock(FigureStorageService.class);
+    private FigureUploader figureUploader = new FigureUploader(storageService, uploadConfiguration);
 
     @Before
     public void setUp() {
@@ -36,7 +38,7 @@ public class FigureUploaderIntegrationTest {
 
         try {
             // when
-            figureUploader.upload(nonImageFileURL);
+            figureUploader.fromLink(nonImageFileURL);
             fail();
         } catch (Exception e) {
             // then
@@ -47,11 +49,12 @@ public class FigureUploaderIntegrationTest {
     @Test
     public void shouldSaveJPG() {
         // given
+        given(uploadConfiguration.getMaxSize()).willReturn(5 * 1024 * 1024);
         final String imageURL = "https://dl.dropbox.com/u/1114182/memgen/philosoraptor.jpg";
         // when
-        figureUploader.upload(imageURL);
+        figureUploader.fromLink(imageURL);
         // then
-        verify(amazonS3).putObject(any(PutObjectRequest.class));
+        verify(storageService).save(BDDMockito.anyString(), any(ObjectMetadata.class), any(InputStream.class));
     }
 
     @Test
@@ -60,7 +63,7 @@ public class FigureUploaderIntegrationTest {
         final String emptyImageURL = "https://dl.dropbox.com/u/1114182/memgen/empty.jpg";
         try {
             // when
-            figureUploader.upload(emptyImageURL);
+            figureUploader.fromLink(emptyImageURL);
             fail();
         } catch (Exception e) {
             // then
@@ -74,11 +77,24 @@ public class FigureUploaderIntegrationTest {
         final String hugeImageURL = "https://dl.dropbox.com/u/1114182/memgen/over5mb.jpg";
         try {
             // when
-            figureUploader.upload(hugeImageURL);
+            figureUploader.fromLink(hugeImageURL);
             fail();
         } catch (Exception e) {
             // then
             assertThat(e).isInstanceOf(ImageDownloadException.class);
         }
+    }
+
+    @Test
+    public void shouldNotExceedDownloadLimit() {
+        given(uploadConfiguration.getMaxSize()).willReturn(1024);
+        figureUploader = new FigureUploader(storageService, uploadConfiguration);
+        InputStream tooBigFileStream = getClass().getClassLoader().getResourceAsStream("philosoraptor.jpg");
+        // when
+        figureUploader.fromDisk(tooBigFileStream, "image/jpeg");
+        // then
+        ArgumentCaptor<ObjectMetadata> captor = ArgumentCaptor.forClass(ObjectMetadata.class);
+        verify(storageService).save(any(String.class), captor.capture(), any(InputStream.class));
+        assertThat(captor.getValue().getContentLength()).isLessThanOrEqualTo(1024);
     }
 }

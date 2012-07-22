@@ -58,21 +58,27 @@ public class AmazonFigureStorageService implements FigureStorageService {
     }
 
     @Override
-    public Figure save(String filename, ObjectMetadata objectMetadata, InputStream inputStream) {
+    public Figure save(String contentType, ObjectMetadata objectMetadata, InputStream inputStream) {
         String bucket = storageConfiguration.getBucket();
-        String key = generateRandomKeyWithExtension(filename);
+        String key = getExtension(contentType);
 
         PutObjectRequest request = new PutObjectRequest(bucket, key, inputStream, objectMetadata);
         request.setCannedAcl(CannedAccessControlList.PublicRead);
 
         amazon.putObject(request);
-        LOG.info("{} saved as {}", filename, getAmazonUrl(key));
+        LOG.info("{} saved as {}", contentType, getAmazonUrl(key));
 
         return new Figure(key, getAmazonUrl(key));
     }
 
-    private String generateRandomKeyWithExtension(String filename) {
-        return UUID.randomUUID().toString() + filename.substring(filename.length() - 4);
+    private String getExtension(String contentType) {
+        switch (contentType) {
+            case "image/jpeg":
+                return UUID.randomUUID().toString() + ".jpg";
+            case "image/png":
+                return UUID.randomUUID().toString() + ".png";
+        }
+        throw new IllegalStateException("Content type not supported.");
     }
 
     public Figure findOne(String id) {
