@@ -10,7 +10,7 @@ import java.net.URL;
 import java.util.Arrays;
 import pl.pks.memgen.UploadConfiguration;
 import pl.pks.memgen.api.Figure;
-import pl.pks.memgen.db.FigureStorageService;
+import pl.pks.memgen.db.StorageService;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.google.common.io.LimitInputStream;
 import com.yammer.dropwizard.logging.Log;
@@ -19,10 +19,10 @@ public class FigureUploader {
 
     private static final Log LOG = Log.forClass(FigureUploader.class);
 
-    private final FigureStorageService storageService;
+    private final StorageService storageService;
     private final UploadConfiguration configuration;
 
-    public FigureUploader(FigureStorageService storageService, UploadConfiguration configuration) {
+    public FigureUploader(StorageService storageService, UploadConfiguration configuration) {
         this.storageService = storageService;
         this.configuration = configuration;
     }
@@ -57,7 +57,7 @@ public class FigureUploader {
         int length = copy(limitInputStream, temp);
         checkContentLength(length);
         ObjectMetadata objectMetadata = getObjectMetadata(length, contentType);
-        return storageService.save(objectMetadata, new ByteArrayInputStream(temp.toByteArray()));
+        return storageService.saveFigure(objectMetadata, new ByteArrayInputStream(temp.toByteArray()));
     }
 
     private void checkContentLength(HttpURLConnection urlConnection) throws IOException {

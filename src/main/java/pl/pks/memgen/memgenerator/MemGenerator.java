@@ -6,25 +6,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.api.Meme;
-import pl.pks.memgen.db.FigureStorageService;
+import pl.pks.memgen.db.StorageService;
 import pl.pks.memgen.io.FigureDownloader;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 
 public class MemGenerator {
 
     private final FigureDownloader figureDownloader;
-    private final FigureStorageService storageService;
+    private final StorageService storageService;
     private final FigureTransformer figureTransformer;
 
-    public MemGenerator(FigureDownloader imageDownloader, FigureStorageService storageService,
-                            FigureTransformer imageTransformer) {
+    public MemGenerator(FigureDownloader imageDownloader, StorageService storageService,
+                        FigureTransformer imageTransformer) {
         this.figureDownloader = imageDownloader;
         this.storageService = storageService;
         this.figureTransformer = imageTransformer;
     }
 
     public String generate(Meme meme) {
-        Figure figure = storageService.findOne(meme.getId());
+        Figure figure = storageService.findOneMeme(meme.getId());
         InputStream input = figureDownloader.download(figure.getUrl());
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
@@ -37,16 +37,15 @@ public class MemGenerator {
         Figure savedImage = saveMeme(figure, generatedMeme.length, memeInputStream);
 
         closeStreams(input, output, memeInputStream);
-        return savedImage.getUrl();
+        return savedImage.getId();
     }
 
-    private Figure saveMeme(Figure figure, long size, ByteArrayInputStream memeInputStream) {
+    private Meme saveMeme(Figure figure, long size, ByteArrayInputStream memeInputStream) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(size);
         String contentType = storageService.findContentType(figure.getId());
         objectMetadata.setContentType(contentType);
-        Figure savedImage = storageService.save(objectMetadata, memeInputStream);
-        return savedImage;
+        return storageService.saveMeme(objectMetadata, memeInputStream);
     }
 
     private void closeStreams(InputStream input, ByteArrayOutputStream output, ByteArrayInputStream memeInputStream) {

@@ -37,6 +37,9 @@
 				 <li>
 				 	<a href="/figure/fromDisk">from disk</a>
 				 </li>
+				 <li>
+				 	<a href="/meme">all memes</a>
+				 </li>
 	          </ul>
 	        </div>
 	      </div>

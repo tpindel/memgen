@@ -6,7 +6,7 @@ import com.yammer.dropwizard.views.View;
 
 public class AllFigureView extends View {
 
-    public final List<Figure> figures;
+    private final List<Figure> figures;
 
     public AllFigureView(List<Figure> figures) {
         super("/views/figure/allFigures.ftl");

@@ -9,8 +9,9 @@ import static org.mockito.Mockito.mock;
 import java.io.InputStream;
 import javax.ws.rs.core.MediaType;
 import org.junit.Test;
+import org.mockito.BDDMockito;
 import pl.pks.memgen.api.Figure;
-import pl.pks.memgen.db.FigureStorageService;
+import pl.pks.memgen.db.StorageService;
 import pl.pks.memgen.io.FigureUploader;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -21,7 +22,7 @@ import com.yammer.dropwizard.views.ViewMessageBodyWriter;
 
 public class FigureResourceIntegrationTest extends ResourceTest {
 
-    private FigureStorageService storage = mock(FigureStorageService.class);
+    private StorageService storage = mock(StorageService.class);
     private FigureUploader uploader = mock(FigureUploader.class);
 
     @Override
@@ -60,6 +61,16 @@ public class FigureResourceIntegrationTest extends ResourceTest {
         // then
         String locationHeader = post.getHeaders().getFirst("location");
         assertThat(locationHeader).contains("/meme/foo.jpg");
+    }
+
+    @Test
+    public void shouldShowAllFigures() {
+        // given
+        WebResource service = client().resource("/figure");
+        // when
+        service.get(String.class);
+        // then
+        BDDMockito.verify(storage).findAllFigures();
     }
 
     private Figure getFigureFixed() {

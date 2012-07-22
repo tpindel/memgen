@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import pl.pks.memgen.StorageConfiguration;
 import pl.pks.memgen.UploadConfiguration;
-import pl.pks.memgen.db.FigureStorageService;
+import pl.pks.memgen.db.StorageService;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 
 public class FigureUploaderIntegrationTest {
@@ -21,7 +21,7 @@ public class FigureUploaderIntegrationTest {
     private StorageConfiguration storageConfiguration = mock(StorageConfiguration.class);
     private UploadConfiguration uploadConfiguration = mock(UploadConfiguration.class);
 
-    private FigureStorageService storageService = mock(FigureStorageService.class);
+    private StorageService storageService = mock(StorageService.class);
     private FigureUploader figureUploader = new FigureUploader(storageService, uploadConfiguration);
 
     @Before
@@ -53,7 +53,7 @@ public class FigureUploaderIntegrationTest {
         // when
         figureUploader.fromLink(imageURL);
         // then
-        verify(storageService).save(any(ObjectMetadata.class), any(InputStream.class));
+        verify(storageService).saveFigure(any(ObjectMetadata.class), any(InputStream.class));
     }
 
     @Test
@@ -93,7 +93,7 @@ public class FigureUploaderIntegrationTest {
         figureUploader.fromDisk(tooBigFileStream, "image/jpeg");
         // then
         ArgumentCaptor<ObjectMetadata> captor = ArgumentCaptor.forClass(ObjectMetadata.class);
-        verify(storageService).save(captor.capture(), any(InputStream.class));
+        verify(storageService).saveFigure(captor.capture(), any(InputStream.class));
         assertThat(captor.getValue().getContentLength()).isLessThanOrEqualTo(1024);
     }
 }

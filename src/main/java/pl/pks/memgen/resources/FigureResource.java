@@ -11,7 +11,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import pl.pks.memgen.api.Figure;
-import pl.pks.memgen.db.FigureStorageService;
+import pl.pks.memgen.db.StorageService;
 import pl.pks.memgen.io.FigureUploader;
 import pl.pks.memgen.io.ImageDownloadException;
 import pl.pks.memgen.views.figure.AllFigureView;
@@ -27,10 +27,10 @@ import com.yammer.metrics.annotation.Timed;
 @Path("/figure")
 public class FigureResource {
 
-    private final FigureStorageService figureStorageService;
+    private final StorageService figureStorageService;
     private final FigureUploader figureUploader;
 
-    public FigureResource(FigureStorageService figureStorageService, FigureUploader figureUploader) {
+    public FigureResource(StorageService figureStorageService, FigureUploader figureUploader) {
         this.figureStorageService = figureStorageService;
         this.figureUploader = figureUploader;
     }
@@ -38,7 +38,7 @@ public class FigureResource {
     @Timed
     @GET
     public AllFigureView all() {
-        return new AllFigureView(figureStorageService.findAll());
+        return new AllFigureView(figureStorageService.findAllFigures());
     }
 
     @Timed
