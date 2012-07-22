@@ -32,10 +32,11 @@
 	        <div class="nav-collapse">
 	          <ul class="nav">
 	             <li class="active">
-	             	<a href="/figure/new">Upload</a>
+	             	<a href="/figure/new">from link</a>
   				 </li>
-				 <li><a href="#">Link</a></li>
-				 <li><a href="#">Link</a></li>
+				 <li>
+				 	<a href="/figure/fromDisk">from disk</a>
+				 </li>
 	          </ul>
 	        </div>
 	      </div>
