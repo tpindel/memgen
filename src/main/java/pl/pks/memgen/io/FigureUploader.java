@@ -28,14 +28,11 @@ public class FigureUploader {
     }
 
     public Figure fromLink(String url) {
-        try {
+        try (InputStream inputStream = doGETRequest(url).getInputStream()) {
             HttpURLConnection urlConnection = doHEADRequest(url);
             String contentType = urlConnection.getContentType();
             checkContentType(contentType);
             checkContentLength(urlConnection);
-
-            InputStream inputStream = doGETRequest(url).getInputStream();
-
             return persist(inputStream, contentType);
 
         } catch (IOException | IllegalArgumentException e) {
