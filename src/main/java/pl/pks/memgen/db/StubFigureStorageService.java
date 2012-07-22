@@ -23,8 +23,12 @@ public class StubFigureStorageService implements FigureStorageService {
     }
 
     @Override
-    public Figure save(String url, ObjectMetadata objectMetadata, InputStream inputStream) {
+    public Figure save(ObjectMetadata objectMetadata, InputStream inputStream) {
         return new Figure("123", "http://placehold.it/250x250");
     }
 
+    @Override
+    public String findContentType(String id) {
+        return "image/jpeg";
+    }
 }

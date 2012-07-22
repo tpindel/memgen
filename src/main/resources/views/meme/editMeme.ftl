@@ -1,4 +1,4 @@
-<#import "common.ftl" as c/>
+<#import "../common.ftl" as c/>
 <@c.page title="memgen">
 	<img src="${url}" alt="">
 	<form class="well form-inline" name="memGen" method="post" action="/edit/${id}">

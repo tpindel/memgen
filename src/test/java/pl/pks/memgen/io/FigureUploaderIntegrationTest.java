@@ -11,7 +11,6 @@ import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.BDDMockito;
 import pl.pks.memgen.StorageConfiguration;
 import pl.pks.memgen.UploadConfiguration;
 import pl.pks.memgen.db.FigureStorageService;
@@ -54,7 +53,7 @@ public class FigureUploaderIntegrationTest {
         // when
         figureUploader.fromLink(imageURL);
         // then
-        verify(storageService).save(BDDMockito.anyString(), any(ObjectMetadata.class), any(InputStream.class));
+        verify(storageService).save(any(ObjectMetadata.class), any(InputStream.class));
     }
 
     @Test
@@ -94,7 +93,7 @@ public class FigureUploaderIntegrationTest {
         figureUploader.fromDisk(tooBigFileStream, "image/jpeg");
         // then
         ArgumentCaptor<ObjectMetadata> captor = ArgumentCaptor.forClass(ObjectMetadata.class);
-        verify(storageService).save(any(String.class), captor.capture(), any(InputStream.class));
+        verify(storageService).save(captor.capture(), any(InputStream.class));
         assertThat(captor.getValue().getContentLength()).isLessThanOrEqualTo(1024);
     }
 }

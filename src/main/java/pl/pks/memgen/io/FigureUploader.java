@@ -59,8 +59,8 @@ public class FigureUploader {
         ByteArrayOutputStream temp = new ByteArrayOutputStream();
         int length = copy(limitInputStream, temp);
         checkContentLength(length);
-        ObjectMetadata objectMetadata = getObjectMetadata(length);
-        return storageService.save(contentType, objectMetadata, new ByteArrayInputStream(temp.toByteArray()));
+        ObjectMetadata objectMetadata = getObjectMetadata(length, contentType);
+        return storageService.save(objectMetadata, new ByteArrayInputStream(temp.toByteArray()));
     }
 
     private void checkContentLength(HttpURLConnection urlConnection) throws IOException {
@@ -94,9 +94,10 @@ public class FigureUploader {
         return urlConnection;
     }
 
-    private ObjectMetadata getObjectMetadata(long contentLength) {
+    private ObjectMetadata getObjectMetadata(long contentLength, String contentType) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(contentLength);
+        objectMetadata.setContentType(contentType);
         return objectMetadata;
     }
 

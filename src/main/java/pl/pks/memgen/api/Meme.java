@@ -11,8 +11,8 @@ public class Meme extends Figure {
     private final String bottomTitle;
 
     public Meme(@JsonProperty("id") String id, @JsonProperty("url") String url,
-                         @JsonProperty("topTitle") String topTitle,
-                         @JsonProperty("bottomTitle") String bottomTitle) {
+                @JsonProperty("topTitle") String topTitle,
+                @JsonProperty("bottomTitle") String bottomTitle) {
         super(id, url);
         this.topTitle = topTitle;
         this.bottomTitle = bottomTitle;

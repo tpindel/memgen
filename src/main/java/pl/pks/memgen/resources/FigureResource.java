@@ -20,7 +20,6 @@ import pl.pks.memgen.views.figure.NewFigureFromDisk;
 import pl.pks.memgen.views.figure.NewFigureView;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
-import com.yammer.dropwizard.logging.Log;
 import com.yammer.dropwizard.views.View;
 import com.yammer.metrics.annotation.Timed;
 

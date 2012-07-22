@@ -1,13 +1,13 @@
-package pl.pks.memgen.views;
+package pl.pks.memgen.views.meme;
 
 import com.yammer.dropwizard.views.View;
 
-public class GeneratedMemView extends View {
+public class GeneratedMemeView extends View {
 
     private final String memPath;
 
-    public GeneratedMemView(String memPath) {
-        super("/views/generatedMem.ftl");
+    public GeneratedMemeView(String memPath) {
+        super("/views/meme/generatedMeme.ftl");
         this.memPath = memPath;
     }
 

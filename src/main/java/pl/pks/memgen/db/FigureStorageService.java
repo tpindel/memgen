@@ -11,5 +11,7 @@ public interface FigureStorageService {
 
     Figure findOne(String id);
 
-    Figure save(String url, ObjectMetadata objectMetadata, InputStream inputStream);
+    Figure save(ObjectMetadata objectMetadata, InputStream inputStream);
+
+    String findContentType(String id);
 }

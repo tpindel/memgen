@@ -47,8 +47,9 @@ public class MemGeneratorImpl implements MemGenerator {
     private Figure saveMeme(Figure figure, long size, ByteArrayInputStream memeInputStream) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(size);
-
-        Figure savedImage = storageService.save(figure.getId(), objectMetadata, memeInputStream);
+        String contentType = storageService.findContentType(figure.getId());
+        objectMetadata.setContentType(contentType);
+        Figure savedImage = storageService.save(objectMetadata, memeInputStream);
         return savedImage;
     }
 

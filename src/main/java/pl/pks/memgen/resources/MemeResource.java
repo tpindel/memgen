@@ -12,7 +12,7 @@ import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.api.Meme;
 import pl.pks.memgen.db.FigureStorageService;
 import pl.pks.memgen.memgenerator.MemGenerator;
-import pl.pks.memgen.views.GeneratedMemView;
+import pl.pks.memgen.views.meme.GeneratedMemeView;
 import pl.pks.memgen.views.meme.NewMemeView;
 import com.yammer.metrics.annotation.Timed;
 
@@ -38,10 +38,10 @@ public class MemeResource {
     @Timed
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public GeneratedMemView generateMeme(@PathParam("id") String id, @FormParam("topTitle") String topTitle,
+    public GeneratedMemeView generateMeme(@PathParam("id") String id, @FormParam("topTitle") String topTitle,
                                          @FormParam("bottomTitle") String bottomTitle) {
         String generatedMemImageFilePath = memGenerator.generate(new Meme(id, null, topTitle, bottomTitle));
 
-        return new GeneratedMemView(generatedMemImageFilePath);
+        return new GeneratedMemeView(generatedMemImageFilePath);
     }
 }

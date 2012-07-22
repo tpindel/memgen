@@ -58,15 +58,14 @@ public class AmazonFigureStorageService implements FigureStorageService {
     }
 
     @Override
-    public Figure save(String contentType, ObjectMetadata objectMetadata, InputStream inputStream) {
+    public Figure save(ObjectMetadata objectMetadata, InputStream inputStream) {
         String bucket = storageConfiguration.getBucket();
-        String key = getExtension(contentType);
-
+        String key = getExtension(objectMetadata.getContentType());
         PutObjectRequest request = new PutObjectRequest(bucket, key, inputStream, objectMetadata);
         request.setCannedAcl(CannedAccessControlList.PublicRead);
 
         amazon.putObject(request);
-        LOG.info("{} saved as {}", contentType, getAmazonUrl(key));
+        LOG.info("aved as {}", getAmazonUrl(key));
 
         return new Figure(key, getAmazonUrl(key));
     }
@@ -92,5 +91,10 @@ public class AmazonFigureStorageService implements FigureStorageService {
             }
         }
         return null;
+    }
+
+    @Override
+    public String findContentType(String id) {
+        return amazon.getObject(storageConfiguration.getBucket(), id).getObjectMetadata().getContentType();
     }
 }
