@@ -58,6 +58,7 @@ public class FigureUploader {
         LimitInputStream limitInputStream = new LimitInputStream(uploadedInputStream, configuration.getMaxSize());
         ByteArrayOutputStream temp = new ByteArrayOutputStream();
         int length = copy(limitInputStream, temp);
+        checkContentLength(length);
         ObjectMetadata objectMetadata = getObjectMetadata(length);
         return storageService.save(contentType, objectMetadata, new ByteArrayInputStream(temp.toByteArray()));
     }
