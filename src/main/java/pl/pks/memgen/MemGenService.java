@@ -4,12 +4,10 @@ import pl.pks.memgen.db.AmazonFigureStorageService;
 import pl.pks.memgen.db.FigureStorageService;
 import pl.pks.memgen.health.PlaceholderHealthCheck;
 import pl.pks.memgen.io.FigureDownloader;
-import pl.pks.memgen.io.FigureFromUrlDownloader;
 import pl.pks.memgen.io.FigureUploader;
 import pl.pks.memgen.memgenerator.FigureTransformer;
 import pl.pks.memgen.memgenerator.MemGenerator;
-import pl.pks.memgen.memgenerator.impl.Im4jTransformer;
-import pl.pks.memgen.memgenerator.impl.MemGeneratorImpl;
+import pl.pks.memgen.memgenerator.im4j.Im4jTransformer;
 import pl.pks.memgen.resources.FigureResource;
 import pl.pks.memgen.resources.MemeResource;
 import pl.pks.memgen.resources.RootResource;
@@ -39,11 +37,11 @@ public class MemGenService extends Service<MemGenConfiguration> {
         UploadConfiguration uploadConfiguration = conf.getUpload();
 
         AmazonS3Client amazonS3Client = initializeAmazonS3Client(storageConfiguration);
-        FigureDownloader figureDownloader = new FigureFromUrlDownloader();
+        FigureDownloader figureDownloader = new FigureDownloader();
         FigureStorageService storageService = new AmazonFigureStorageService(amazonS3Client, storageConfiguration);
         FigureUploader figureUploader = new FigureUploader(storageService, uploadConfiguration);
         FigureTransformer figureTransformer = new Im4jTransformer();
-        MemGenerator memGenerator = new MemGeneratorImpl(figureDownloader, storageService, figureTransformer);
+        MemGenerator memGenerator = new MemGenerator(figureDownloader, storageService, figureTransformer);
         env.addResource(new MemeResource(storageService, memGenerator));
         env.addResource(new FigureResource(storageService, figureUploader));
         env.addResource(new RootResource());

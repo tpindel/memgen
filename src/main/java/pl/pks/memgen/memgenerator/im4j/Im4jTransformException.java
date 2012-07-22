@@ -1,4 +1,4 @@
-package pl.pks.memgen.memgenerator;
+package pl.pks.memgen.memgenerator.im4j;
 
 @SuppressWarnings("serial")
 public class Im4jTransformException extends RuntimeException {

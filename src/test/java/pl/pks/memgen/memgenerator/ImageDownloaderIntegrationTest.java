@@ -4,13 +4,12 @@ import static org.fest.assertions.Assertions.assertThat;
 import java.io.IOException;
 import java.io.InputStream;
 import org.junit.Test;
-import pl.pks.memgen.io.ImageDownloadException;
 import pl.pks.memgen.io.FigureDownloader;
-import pl.pks.memgen.io.FigureFromUrlDownloader;
+import pl.pks.memgen.io.ImageDownloadException;
 
 public class ImageDownloaderIntegrationTest {
 
-    private FigureDownloader imageDownloader = new FigureFromUrlDownloader();
+    private FigureDownloader imageDownloader = new FigureDownloader();
 
     @Test
     public void downloadImageFromS3() {
