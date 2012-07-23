@@ -97,4 +97,18 @@ public class FigureUploaderIntegrationTest {
         assertThat(captor.getValue().getContentLength()).isLessThanOrEqualTo(1024);
     }
 
+    @Test
+    public void shouldNotUploadIfBadContentType() {
+        // given
+        final String bmpFile = "https://dl.dropbox.com/u/1114182/memgen/lena.bmp";
+        try {
+            // when
+            figureUploader.fromLink(bmpFile);
+            fail();
+        } catch (Exception e) {
+            // then
+            assertThat(e).isInstanceOf(ImageDownloadException.class);
+        }
+
+    }
 }
