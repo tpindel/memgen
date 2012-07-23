@@ -10,13 +10,12 @@ public class FigureDownloader {
     public InputStream download(String imageUrl) {
         try {
             URLConnection uc = setupConnection(imageUrl);
-
             InputStream input = uc.getInputStream();
+
             return input;
         } catch (IOException e) {
             throw new ImageDownloadException(e);
         }
-
     }
 
     private URLConnection setupConnection(String imageUrl) throws IOException {
@@ -26,5 +25,4 @@ public class FigureDownloader {
         uc.setConnectTimeout(10000);
         return uc;
     }
-
 }

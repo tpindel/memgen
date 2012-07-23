@@ -25,19 +25,18 @@ public class MemGenerator {
 
     public String generate(Meme meme) {
         Figure figure = storageService.findOneMeme(meme.getId());
-        InputStream input = figureDownloader.download(figure.getUrl());
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-        figureTransformer.transform(meme, input, output);
-
-        byte[] generatedMeme = output.toByteArray();
-        ByteArrayInputStream memeInputStream = new ByteArrayInputStream(
-            generatedMeme);
-
-        Figure savedImage = saveMeme(figure, generatedMeme.length, memeInputStream);
-
-        closeStreams(input, output, memeInputStream);
-        return savedImage.getId();
+        try (InputStream input = figureDownloader.download(figure.getUrl())) {
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            figureTransformer.transform(meme, input, output);
+            byte[] generatedMeme = output.toByteArray();
+            ByteArrayInputStream memeInputStream = new ByteArrayInputStream(
+                generatedMeme);
+            Figure savedImage = saveMeme(figure, generatedMeme.length, memeInputStream);
+            return savedImage.getId();
+        } catch (IOException e) {
+            throw new MemeGeneratorException(e);
+        }
     }
 
     private Meme saveMeme(Figure figure, long size, ByteArrayInputStream memeInputStream) {
@@ -46,15 +45,5 @@ public class MemGenerator {
         String contentType = storageService.findContentType(figure.getId());
         objectMetadata.setContentType(contentType);
         return storageService.saveMeme(objectMetadata, memeInputStream);
-    }
-
-    private void closeStreams(InputStream input, ByteArrayOutputStream output, ByteArrayInputStream memeInputStream) {
-        try {
-            memeInputStream.close();
-            output.close();
-            input.close();
-        } catch (IOException e) {
-            throw new MemeGeneratorException(e);
-        }
     }
 }
