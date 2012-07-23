@@ -31,7 +31,7 @@ public class FigureUploaderIntegrationTest {
     }
 
     @Test
-    public void shouldNotSaveIfNotImage() {
+    public void shouldNotUploadIfNotAnImage() {
         // given
         final String nonImageFileURL = "https://dl.dropbox.com/u/1114182/memgen/textFile.txt";
 
@@ -46,9 +46,9 @@ public class FigureUploaderIntegrationTest {
     }
 
     @Test
-    public void shouldSaveJPG() {
+    public void shouldUploadJPG() {
         // given
-        given(uploadConfiguration.getMaxSize()).willReturn(5 * 1024 * 1024);
+        given(uploadConfiguration.getMaxSize()).willReturn(2 * 1024 * 1024);
         final String imageURL = "https://dl.dropbox.com/u/1114182/memgen/philosoraptor.jpg";
         // when
         figureUploader.fromLink(imageURL);
@@ -57,7 +57,7 @@ public class FigureUploaderIntegrationTest {
     }
 
     @Test
-    public void shouldNotSaveIfEmpty() {
+    public void shouldNotUploadIfEmpty() {
         // given
         final String emptyImageURL = "https://dl.dropbox.com/u/1114182/memgen/empty.jpg";
         try {
@@ -71,7 +71,7 @@ public class FigureUploaderIntegrationTest {
     }
 
     @Test
-    public void shouldNotSaveIfAllowedContentLengthIsExceeded() {
+    public void shouldNotUploadIfAllowedContentLengthIsExceeded() {
         // given
         final String hugeImageURL = "https://dl.dropbox.com/u/1114182/memgen/over5mb.jpg";
         try {
@@ -96,4 +96,5 @@ public class FigureUploaderIntegrationTest {
         verify(storageService).saveFigure(captor.capture(), any(InputStream.class));
         assertThat(captor.getValue().getContentLength()).isLessThanOrEqualTo(1024);
     }
+
 }
