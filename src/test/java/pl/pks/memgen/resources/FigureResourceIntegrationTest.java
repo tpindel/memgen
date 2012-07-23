@@ -42,7 +42,7 @@ public class FigureResourceIntegrationTest extends ResourceTest {
         ClientResponse post = service.type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, form);
         // then
         String locationHeader = post.getHeaders().getFirst("location");
-        assertThat(locationHeader).contains("/meme/foo.jpg");
+        assertThat(locationHeader).contains("/meme/new/foo.jpg");
     }
 
     @Test
@@ -60,7 +60,7 @@ public class FigureResourceIntegrationTest extends ResourceTest {
 
         // then
         String locationHeader = post.getHeaders().getFirst("location");
-        assertThat(locationHeader).contains("/meme/foo.jpg");
+        assertThat(locationHeader).contains("/meme/new/foo.jpg");
     }
 
     @Test
