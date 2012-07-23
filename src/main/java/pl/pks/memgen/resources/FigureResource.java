@@ -1,6 +1,7 @@
 package pl.pks.memgen.resources;
 
 import java.io.InputStream;
+import java.net.URI;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -54,11 +55,17 @@ public class FigureResource {
     public Response addNewFigure(@FormParam("url") String url) {
         try {
             Figure uploaded = figureUploader.fromLink(url);
-            return Response.seeOther(UriBuilder.fromResource(MemeResource.class).build(uploaded.getId())).build();
+            return Response.seeOther(
+                redirectToMemeGeneration(uploaded))
+                .build();
         } catch (ImageDownloadException e) {
             return redirectToErrorPage();
         }
 
+    }
+
+    private URI redirectToMemeGeneration(Figure uploaded) {
+        return UriBuilder.fromResource(MemeResource.class).path("new/{id}").build(uploaded.getId());
     }
 
     private Response redirectToErrorPage() {
@@ -81,7 +88,8 @@ public class FigureResource {
         try {
             Figure uploaded = figureUploader.fromDisk(fileInputStream, bodyPart.getMediaType()
                 .toString());
-            return Response.seeOther(UriBuilder.fromResource(MemeResource.class).build(uploaded.getId())).build();
+            return Response.seeOther(redirectToMemeGeneration(uploaded))
+                .build();
         } catch (ImageDownloadException e) {
             return redirectToErrorPage();
         }
