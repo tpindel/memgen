@@ -13,7 +13,6 @@ import pl.pks.memgen.resources.MemeResource;
 import pl.pks.memgen.resources.RootResource;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.google.common.cache.CacheBuilderSpec;
 import com.yammer.dropwizard.Service;
 import com.yammer.dropwizard.bundles.AssetsBundle;
 import com.yammer.dropwizard.config.Environment;
@@ -24,7 +23,7 @@ public class MemGenService extends Service<MemGenConfiguration> {
     private MemGenService() {
         super("MemGen");
         addBundle(new ViewBundle());
-        addBundle(new AssetsBundle(AssetsBundle.DEFAULT_PATH, CacheBuilderSpec.disableCaching()));
+        addBundle(new AssetsBundle(AssetsBundle.DEFAULT_PATH));
     }
 
     public static void main(String[] args) throws Exception {
