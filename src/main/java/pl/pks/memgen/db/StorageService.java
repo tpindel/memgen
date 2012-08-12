@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.List;
 import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.api.Meme;
+import pl.pks.memgen.io.UploadedImage;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 
 public interface StorageService {
@@ -12,7 +13,7 @@ public interface StorageService {
 
     Figure findOneFigure(String id);
 
-    Figure saveFigure(ObjectMetadata objectMetadata, InputStream inputStream);
+    Figure saveFigure(UploadedImage uploadedImage);
 
     List<Meme> findAllMemes();
 

@@ -7,4 +7,8 @@ public class ImageDownloadException extends RuntimeException {
         super(e);
     }
 
+    public ImageDownloadException() {
+        super();
+    }
+
 }

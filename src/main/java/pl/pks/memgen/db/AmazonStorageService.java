@@ -9,6 +9,7 @@ import java.util.UUID;
 import pl.pks.memgen.StorageConfiguration;
 import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.api.Meme;
+import pl.pks.memgen.io.UploadedImage;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -53,8 +54,11 @@ public class AmazonStorageService implements StorageService {
     }
 
     @Override
-    public Figure saveFigure(ObjectMetadata objectMetadata, InputStream inputStream) {
-        String key = save(objectMetadata, inputStream, FIGURE);
+    public Figure saveFigure(UploadedImage uploadedImage) {
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(uploadedImage.getContentLength());
+        objectMetadata.setContentType(uploadedImage.getContentType());
+        String key = save(objectMetadata, uploadedImage.getDataInputStream(), FIGURE);
         return new Figure(key, getAmazonUrl(key));
     }
 

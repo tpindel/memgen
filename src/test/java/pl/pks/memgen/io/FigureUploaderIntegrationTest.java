@@ -1,114 +1,60 @@
 package pl.pks.memgen.io;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import pl.pks.memgen.StorageConfiguration;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 import pl.pks.memgen.UploadConfiguration;
 import pl.pks.memgen.db.StorageService;
-import com.amazonaws.services.s3.model.ObjectMetadata;
+import pl.pks.memgen.io.processor.ImageProcessorFactory;
 
 public class FigureUploaderIntegrationTest {
 
-    private StorageConfiguration storageConfiguration = mock(StorageConfiguration.class);
-    private UploadConfiguration uploadConfiguration = mock(UploadConfiguration.class);
-
     private StorageService storageService = mock(StorageService.class);
-    private FigureUploader figureUploader = new FigureUploader(storageService, uploadConfiguration);
+    private UploadConfiguration uploadConfiguration = new UploadConfiguration();
+    private ImageProcessorFactory imageProcessorFactory = new ImageProcessorFactory(uploadConfiguration);
+
+    private FigureUploader figureUploader = new FigureUploader(storageService, imageProcessorFactory.create(),
+        new ImageDownloader());
+
+    @Captor
+    private ArgumentCaptor<UploadedImage> captor;
 
     @Before
     public void setUp() {
-        when(storageConfiguration.getBucket()).thenReturn("memgen");
-        when(storageConfiguration.getEndpoint()).thenReturn("https://s3-eu-west-1.amazonaws.com");
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void shouldNotUploadIfNotAnImage() {
+    public void shouldUploadJPGFromLink() {
         // given
-        final String nonImageFileURL = "https://dl.dropbox.com/u/1114182/memgen/textFile.txt";
-
-        try {
-            // when
-            figureUploader.fromLink(nonImageFileURL);
-            fail();
-        } catch (Exception e) {
-            // then
-            assertThat(e).isInstanceOf(ImageDownloadException.class);
-        }
-    }
-
-    @Test
-    public void shouldUploadJPG() {
-        // given
-        given(uploadConfiguration.getMaxSize()).willReturn(2 * 1024 * 1024);
         final String imageURL = "https://dl.dropbox.com/u/1114182/memgen/philosoraptor.jpg";
         // when
         figureUploader.fromLink(imageURL);
         // then
-        verify(storageService).saveFigure(any(ObjectMetadata.class), any(InputStream.class));
+        assertUploadedImage();
     }
 
     @Test
-    public void shouldNotUploadIfEmpty() {
+    public void shouldUploadJPGFromDisk() {
         // given
-        final String emptyImageURL = "https://dl.dropbox.com/u/1114182/memgen/empty.jpg";
-        try {
-            // when
-            figureUploader.fromLink(emptyImageURL);
-            fail();
-        } catch (Exception e) {
-            // then
-            assertThat(e).isInstanceOf(ImageDownloadException.class);
-        }
-    }
-
-    @Test
-    public void shouldNotUploadIfAllowedContentLengthIsExceeded() {
-        // given
-        final String hugeImageURL = "https://dl.dropbox.com/u/1114182/memgen/over5mb.jpg";
-        try {
-            // when
-            figureUploader.fromLink(hugeImageURL);
-            fail();
-        } catch (Exception e) {
-            // then
-            assertThat(e).isInstanceOf(ImageDownloadException.class);
-        }
-    }
-
-    @Test
-    public void shouldNotExceedDownloadLimit() {
-        given(uploadConfiguration.getMaxSize()).willReturn(1024);
-        figureUploader = new FigureUploader(storageService, uploadConfiguration);
-        InputStream tooBigFileStream = getClass().getClassLoader().getResourceAsStream("philosoraptor.jpg");
+        InputStream fileStream = getClass().getClassLoader().getResourceAsStream("philosoraptor.jpg");
         // when
-        figureUploader.fromDisk(tooBigFileStream, "image/jpeg");
+        figureUploader.fromDisk(fileStream, "image/jpeg");
         // then
-        ArgumentCaptor<ObjectMetadata> captor = ArgumentCaptor.forClass(ObjectMetadata.class);
-        verify(storageService).saveFigure(captor.capture(), any(InputStream.class));
-        assertThat(captor.getValue().getContentLength()).isLessThanOrEqualTo(1024);
+        assertUploadedImage();
     }
 
-    @Test
-    public void shouldNotUploadIfBadContentType() {
-        // given
-        final String bmpFile = "https://dl.dropbox.com/u/1114182/memgen/lena.bmp";
-        try {
-            // when
-            figureUploader.fromLink(bmpFile);
-            fail();
-        } catch (Exception e) {
-            // then
-            assertThat(e).isInstanceOf(ImageDownloadException.class);
-        }
-
+    private void assertUploadedImage() {
+        verify(storageService).saveFigure(captor.capture());
+        UploadedImage value = captor.getValue();
+        assertThat(value.getContentType()).isEqualTo("image/jpeg");
+        assertThat(value.getContentLength()).isGreaterThan(0).isLessThanOrEqualTo(uploadConfiguration.getMaxSize());
+        assertThat(value.getDataInputStream()).isNotNull();
     }
 }

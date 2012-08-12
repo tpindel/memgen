@@ -8,3 +8,4 @@ storage:
     endpoint: https://s3-eu-west-1.amazonaws.com
 upload:
     maxSize: 2097152
+    height: 400

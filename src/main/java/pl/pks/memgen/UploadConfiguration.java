@@ -12,8 +12,16 @@ public class UploadConfiguration extends Configuration {
     @JsonProperty
     private int maxSize = 5 * 1024 * 1024;
 
+    @JsonProperty
+    @Min(100)
+    private int height = 400;
+
     public int getMaxSize() {
         return maxSize;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
 }

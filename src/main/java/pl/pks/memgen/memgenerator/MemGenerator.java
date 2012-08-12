@@ -7,16 +7,16 @@ import java.io.InputStream;
 import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.api.Meme;
 import pl.pks.memgen.db.StorageService;
-import pl.pks.memgen.io.FigureDownloader;
+import pl.pks.memgen.io.ImageDownloader;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 
 public class MemGenerator {
 
-    private final FigureDownloader figureDownloader;
+    private final ImageDownloader figureDownloader;
     private final StorageService storageService;
     private final FigureTransformer figureTransformer;
 
-    public MemGenerator(FigureDownloader imageDownloader, StorageService storageService,
+    public MemGenerator(ImageDownloader imageDownloader, StorageService storageService,
                         FigureTransformer imageTransformer) {
         this.figureDownloader = imageDownloader;
         this.storageService = storageService;
@@ -26,7 +26,7 @@ public class MemGenerator {
     public String generate(Meme meme) {
         Figure figure = storageService.findOneMeme(meme.getId());
 
-        try (InputStream input = figureDownloader.download(figure.getUrl())) {
+        try (InputStream input = figureDownloader.getData(figure.getUrl())) {
             ByteArrayOutputStream output = new ByteArrayOutputStream();
             figureTransformer.transform(meme, input, output);
             byte[] generatedMeme = output.toByteArray();

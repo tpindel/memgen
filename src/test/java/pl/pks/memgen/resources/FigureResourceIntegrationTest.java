@@ -6,10 +6,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import java.io.InputStream;
 import javax.ws.rs.core.MediaType;
 import org.junit.Test;
-import org.mockito.BDDMockito;
 import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.db.StorageService;
 import pl.pks.memgen.io.FigureUploader;
@@ -70,7 +70,7 @@ public class FigureResourceIntegrationTest extends ResourceTest {
         // when
         service.get(String.class);
         // then
-        BDDMockito.verify(storage).findAllFigures();
+        verify(storage).findAllFigures();
     }
 
     private Figure getFigureFixed() {

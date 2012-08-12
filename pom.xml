@@ -11,7 +11,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<com.google.guava.version>12.0</com.google.guava.version>
+		<com.google.guava.version>13.0</com.google.guava.version>
 		<com.yammer.dropwizard.version>0.4.4</com.yammer.dropwizard.version>
 		<junit.version>4.10</junit.version>
 		<org.easytesting.version>1.4</org.easytesting.version>
@@ -23,7 +23,7 @@
 		<maven-compiler-plugin.version>2.4</maven-compiler-plugin.version>
 		<maven-shade-plugin.version>1.6</maven-shade-plugin.version>
 
-		<commons-io.version>2.1</commons-io.version>
+		<commons-io.version>2.4</commons-io.version>
 	</properties>
 
 	<dependencies>

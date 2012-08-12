@@ -1,18 +1,10 @@
 package pl.pks.memgen.io;
 
-import static org.apache.commons.io.IOUtils.copy;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Arrays;
-import pl.pks.memgen.UploadConfiguration;
 import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.db.StorageService;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.google.common.io.LimitInputStream;
+import pl.pks.memgen.io.processor.ImageProcessor;
 import com.yammer.dropwizard.logging.Log;
 
 public class FigureUploader {
@@ -20,20 +12,23 @@ public class FigureUploader {
     private static final Log LOG = Log.forClass(FigureUploader.class);
 
     private final StorageService storageService;
-    private final UploadConfiguration configuration;
+    private final ImageProcessor imageProcessor;
+    private final ImageDownloader imageDownloader;
 
-    public FigureUploader(StorageService storageService, UploadConfiguration configuration) {
+    public FigureUploader(StorageService storageService,
+                          ImageProcessor imageProcessor, ImageDownloader imageDownloader) {
         this.storageService = storageService;
-        this.configuration = configuration;
+        this.imageProcessor = imageProcessor;
+        this.imageDownloader = imageDownloader;
     }
 
     public Figure fromLink(String url) {
-        try (InputStream inputStream = doGETRequest(url).getInputStream()) {
-            HttpURLConnection urlConnection = doHEADRequest(url);
-            String contentType = urlConnection.getContentType();
-            checkContentType(contentType);
-            checkContentLength(urlConnection);
-            return persist(inputStream, contentType);
+        try {
+            String contentType = imageDownloader.getContentType(url);
+            long contentLength = imageDownloader.getContentLength(url);
+            InputStream dataInputStream = imageDownloader.getData(url);
+            UploadedImage uploadedImage = new UploadedImage(contentType, contentLength, dataInputStream);
+            return persist(uploadedImage);
 
         } catch (IOException | IllegalArgumentException e) {
             LOG.error(e, "Could not download file {}", url);
@@ -43,59 +38,17 @@ public class FigureUploader {
 
     public Figure fromDisk(InputStream uploadedInputStream, String contentType) {
         try {
-            checkContentType(contentType);
-            return persist(uploadedInputStream, contentType);
-        } catch (IllegalArgumentException | IOException e) {
+            UploadedImage uploadedImage = new UploadedImage(contentType, 0, uploadedInputStream);
+            return persist(uploadedImage);
+        } catch (IllegalArgumentException e) {
             LOG.error(e, "Could not download file");
             throw new ImageDownloadException(e);
         }
     }
 
-    private Figure persist(InputStream uploadedInputStream, String contentType) throws IOException {
-        LimitInputStream limitInputStream = new LimitInputStream(uploadedInputStream, configuration.getMaxSize());
-        ByteArrayOutputStream temp = new ByteArrayOutputStream();
-        int length = copy(limitInputStream, temp);
-        checkContentLength(length);
-        ObjectMetadata objectMetadata = getObjectMetadata(length, contentType);
-        return storageService.saveFigure(objectMetadata, new ByteArrayInputStream(temp.toByteArray()));
-    }
-
-    private void checkContentLength(HttpURLConnection urlConnection) throws IOException {
-        long contentLength = urlConnection.getContentLengthLong();
-        checkContentLength(contentLength);
-    }
-
-    private void checkContentLength(long contentLength) {
-        if (contentLength <= 0 || contentLength > configuration.getMaxSize()) {
-            throw new IllegalArgumentException(String.format("Invalid content length %s", contentLength));
-        }
-    }
-
-    private void checkContentType(String contentType) {
-        boolean valid = Arrays.asList("image/jpeg", "image/png").contains(contentType);
-        if (!valid) {
-            throw new IllegalArgumentException(String.format("Invalid content type %s", contentType));
-        }
-    }
-
-    private HttpURLConnection doHEADRequest(String url) throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
-        urlConnection.setRequestMethod("HEAD");
-        urlConnection.connect();
-        return urlConnection;
-    }
-
-    private HttpURLConnection doGETRequest(String url) throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
-        urlConnection.connect();
-        return urlConnection;
-    }
-
-    private ObjectMetadata getObjectMetadata(long contentLength, String contentType) {
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(contentLength);
-        objectMetadata.setContentType(contentType);
-        return objectMetadata;
+    private Figure persist(UploadedImage uploadedImage) {
+        UploadedImage processed = imageProcessor.handle(uploadedImage);
+        return storageService.saveFigure(processed);
     }
 
 }
