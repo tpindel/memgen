@@ -1,6 +1,5 @@
 package pl.pks.memgen.io;
 
-import java.io.IOException;
 import java.io.InputStream;
 import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.db.StorageService;
@@ -30,9 +29,9 @@ public class FigureUploader {
             UploadedImage uploadedImage = new UploadedImage(contentType, contentLength, dataInputStream);
             return persist(uploadedImage);
 
-        } catch (IOException | IllegalArgumentException e) {
-            LOG.error(e, "Could not download file {}", url);
-            throw new ImageDownloadException(e);
+        } catch (IllegalArgumentException e) {
+            LOG.error(e, "Could not process {}", url);
+            throw new ImageDownloadException();
         }
     }
 
@@ -41,8 +40,8 @@ public class FigureUploader {
             UploadedImage uploadedImage = new UploadedImage(contentType, 0, uploadedInputStream);
             return persist(uploadedImage);
         } catch (IllegalArgumentException e) {
-            LOG.error(e, "Could not download file");
-            throw new ImageDownloadException(e);
+            LOG.error(e, "Could not download the file from a disk");
+            throw new ImageDownloadException();
         }
     }
 
