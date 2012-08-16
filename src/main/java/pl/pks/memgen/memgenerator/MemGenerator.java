@@ -8,7 +8,7 @@ import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.api.Meme;
 import pl.pks.memgen.db.StorageService;
 import pl.pks.memgen.io.ImageDownloader;
-import com.amazonaws.services.s3.model.ObjectMetadata;
+import pl.pks.memgen.io.UploadedImage;
 
 public class MemGenerator {
 
@@ -39,11 +39,12 @@ public class MemGenerator {
         }
     }
 
-    private Meme saveMeme(Figure figure, long size, ByteArrayInputStream memeInputStream) {
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(size);
+    private Meme saveMeme(Figure figure, long contentLength, ByteArrayInputStream memeInputStream) {
+        // ObjectMetadata objectMetadata = new ObjectMetadata();
+        // objectMetadata.setContentLength(size);
         String contentType = storageService.findContentType(figure.getId());
-        objectMetadata.setContentType(contentType);
-        return storageService.saveMeme(objectMetadata, memeInputStream);
+        // objectMetadata.setContentType(contentType);
+        UploadedImage uploadedImage = new UploadedImage(contentType, contentLength, memeInputStream);
+        return storageService.saveMeme(uploadedImage);
     }
 }

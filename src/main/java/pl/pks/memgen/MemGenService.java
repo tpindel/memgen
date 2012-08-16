@@ -1,7 +1,12 @@
 package pl.pks.memgen;
 
 import pl.pks.memgen.db.AmazonStorageService;
+import pl.pks.memgen.db.IdGenerator;
+import pl.pks.memgen.db.NameResolver;
 import pl.pks.memgen.db.StorageService;
+import pl.pks.memgen.db.StorageStrategy;
+import pl.pks.memgen.db.UnderscoreStorageStrategy;
+import pl.pks.memgen.db.UrlResolver;
 import pl.pks.memgen.health.PlaceholderHealthCheck;
 import pl.pks.memgen.io.FigureUploader;
 import pl.pks.memgen.io.ImageDownloader;
@@ -40,7 +45,12 @@ public class MemGenService extends Service<MemGenConfiguration> {
         ImageDownloader figureDownloader = new ImageDownloader();
         ImageProcessorFactory imageProcessorFactory = new ImageProcessorFactory(uploadConfiguration);
 
-        StorageService storageService = new AmazonStorageService(amazonS3Client, storageConfiguration);
+        IdGenerator idGenerator = new IdGenerator();
+        NameResolver nameResolver = new NameResolver(idGenerator);
+        UrlResolver urlResolver = new UrlResolver();
+        StorageStrategy storageStrategy = new UnderscoreStorageStrategy(nameResolver, urlResolver);
+        StorageService storageService = new AmazonStorageService(amazonS3Client, storageStrategy, storageConfiguration);
+
         FigureUploader figureUploader = new FigureUploader(storageService, imageProcessorFactory.create(),
             new ImageDownloader());
         FigureTransformer figureTransformer = new Im4jTransformer();

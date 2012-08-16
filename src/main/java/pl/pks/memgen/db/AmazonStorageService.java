@@ -1,11 +1,8 @@
 package pl.pks.memgen.db;
 
-import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Preconditions.checkNotNull;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import pl.pks.memgen.StorageConfiguration;
 import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.api.Meme;
@@ -19,18 +16,18 @@ import com.yammer.dropwizard.logging.Log;
 
 public class AmazonStorageService implements StorageService {
 
-    private static final String FIGURE = "f_";
-
-    private static final String MEME = "m_";
-
     private static final Log LOG = Log.forClass(AmazonStorageService.class);
 
     private final AmazonS3 amazon;
 
     private final StorageConfiguration storageConfiguration;
 
-    public AmazonStorageService(AmazonS3 amazon, StorageConfiguration storageConfiguration) {
+    private final StorageStrategy storageStrategy;
+
+    public AmazonStorageService(AmazonS3 amazon, StorageStrategy storageStrategy,
+                                StorageConfiguration storageConfiguration) {
         this.amazon = amazon;
+        this.storageStrategy = storageStrategy;
         this.storageConfiguration = storageConfiguration;
     }
 
@@ -44,44 +41,36 @@ public class AmazonStorageService implements StorageService {
             String key = objectSummary.getKey();
             final String url = getAmazonUrl(key);
             figures.add(new Figure(key, url));
-            LOG.info("Generated URL: {}", url);
         }
+        LOG.info("Found {} figures", objectSummaries.size());
         return figures;
     }
 
     private List<S3ObjectSummary> getObjectSummaries() {
-        return amazon.listObjects(storageConfiguration.getBucket(), FIGURE).getObjectSummaries();
+        return amazon.listObjects(storageConfiguration.getBucket(), storageStrategy.getFiguresPath())
+            .getObjectSummaries();
     }
 
     @Override
     public Figure saveFigure(UploadedImage uploadedImage) {
+        String key = storageStrategy.resolveFigureName(uploadedImage.getContentType());
+        String resolvedUrl = persist(uploadedImage, key);
+        return new Figure(key, resolvedUrl);
+    }
+
+    private String persist(UploadedImage uploadedImage, String key) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(uploadedImage.getContentLength());
         objectMetadata.setContentType(uploadedImage.getContentType());
-        String key = save(objectMetadata, uploadedImage.getDataInputStream(), FIGURE);
-        return new Figure(key, getAmazonUrl(key));
-    }
-
-    private String save(ObjectMetadata objectMetadata, InputStream inputStream, String prefix) {
-        String bucket = storageConfiguration.getBucket();
-        String key = prefix + getId(objectMetadata.getContentType());
-
-        PutObjectRequest request = new PutObjectRequest(bucket, key, inputStream, objectMetadata);
+        PutObjectRequest request = new PutObjectRequest(storageConfiguration.getBucket(), key, uploadedImage
+            .getDataInputStream(), objectMetadata);
         request.setCannedAcl(CannedAccessControlList.PublicRead);
-
         amazon.putObject(request);
-        LOG.info("Saved as {}", getAmazonUrl(key));
-        return key;
-    }
 
-    private String getId(String contentType) {
-        switch (contentType) {
-            case "image/jpeg":
-                return UUID.randomUUID().toString() + ".jpg";
-            case "image/png":
-                return UUID.randomUUID().toString() + ".png";
-        }
-        throw new IllegalStateException("Content type not supported.");
+        String resolvedUrl = storageStrategy.resolveUrl(key, storageConfiguration);
+
+        LOG.info("Saved {} under {}", key, resolvedUrl);
+        return resolvedUrl;
     }
 
     public Figure findOneFigure(String id) {
@@ -89,7 +78,9 @@ public class AmazonStorageService implements StorageService {
 
         ObjectMetadata objectMetadata = amazon.getObjectMetadata(storageConfiguration.getBucket(), id);
         if (objectMetadata != null) {
-            return new Figure(id, getAmazonUrl(id));
+            Figure figure = new Figure(id, getAmazonUrl(id));
+            LOG.info("Found {}", figure.toString());
+            return figure;
         } else {
             return null;
         }
@@ -102,7 +93,8 @@ public class AmazonStorageService implements StorageService {
 
     @Override
     public List<Meme> findAllMemes() {
-        List<S3ObjectSummary> objectSummaries = amazon.listObjects(storageConfiguration.getBucket(), MEME)
+        List<S3ObjectSummary> objectSummaries = amazon.listObjects(storageConfiguration.getBucket(),
+            storageStrategy.getMemesPath())
             .getObjectSummaries();
 
         List<Meme> figures = new ArrayList<>();
@@ -116,9 +108,10 @@ public class AmazonStorageService implements StorageService {
     }
 
     @Override
-    public Meme saveMeme(ObjectMetadata objectMetadata, InputStream inputStream) {
-        String key = save(objectMetadata, inputStream, MEME);
-        return new Meme(key, getAmazonUrl(key), null, null);
+    public Meme saveMeme(UploadedImage uploadedImage) {
+        String key = storageStrategy.resolveMemeName(uploadedImage.getContentType());
+        String resolvedUrl = persist(uploadedImage, key);
+        return new Meme(key, resolvedUrl, null, null);
     }
 
     @Override
@@ -134,11 +127,7 @@ public class AmazonStorageService implements StorageService {
     }
 
     private String getAmazonUrl(String key) {
-        return on('/').join(getPublicUrl(storageConfiguration), key);
-    }
-
-    private String getPublicUrl(StorageConfiguration storage) {
-        return on('/').join(storage.getEndpoint(), storage.getBucket());
+        return storageStrategy.resolveUrl(key, storageConfiguration);
     }
 
 }

@@ -23,4 +23,9 @@ public class Figure {
         return url;
     }
 
+    @Override
+    public String toString() {
+        return "Figure [id=" + id + ", url=" + url + "]";
+    }
+
 }
