@@ -1,5 +1,8 @@
 package pl.pks.memgen.resources;
 
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static javax.ws.rs.core.Response.seeOther;
+import static javax.ws.rs.core.UriBuilder.fromResource;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -9,7 +12,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.api.Meme;
 import pl.pks.memgen.db.StorageService;
@@ -35,7 +37,7 @@ public class MemeResource {
     @Timed
     @GET
     @Path("/new/{id}")
-    @Produces(MediaType.TEXT_HTML)
+    @Produces(TEXT_HTML)
     public NewMemeView newMeme(@PathParam("id") String id) {
         Figure figure = storageService.findOneFigure(id);
         return new NewMemeView(figure.getId(), figure.getUrl());
@@ -48,7 +50,7 @@ public class MemeResource {
     public Response generateMeme(@PathParam("id") String id, @FormParam("topTitle") String topTitle,
                                  @FormParam("bottomTitle") String bottomTitle) {
         String key = memGenerator.generate(new Meme(id, null, topTitle, bottomTitle));
-        return Response.seeOther(UriBuilder.fromResource(MemeResource.class).build(key)).build();
+        return seeOther(fromResource(MemeResource.class).build(key)).build();
     }
 
     @GET
@@ -59,7 +61,7 @@ public class MemeResource {
     }
 
     @GET
-    public AllMemeView show() {
+    public AllMemeView showAll() {
         return new AllMemeView(storageService.findAllMemes());
     }
 

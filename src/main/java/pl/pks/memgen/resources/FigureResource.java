@@ -1,5 +1,8 @@
 package pl.pks.memgen.resources;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.Response.seeOther;
 import static javax.ws.rs.core.UriBuilder.fromResource;
 import java.io.InputStream;
@@ -9,7 +12,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.db.StorageService;
@@ -23,7 +25,7 @@ import com.sun.jersey.multipart.FormDataParam;
 import com.yammer.dropwizard.views.View;
 import com.yammer.metrics.annotation.Timed;
 
-@Produces(MediaType.TEXT_HTML)
+@Produces(TEXT_HTML)
 @Path("/figure")
 public class FigureResource {
 
@@ -37,7 +39,7 @@ public class FigureResource {
 
     @Timed
     @GET
-    public AllFigureView all() {
+    public AllFigureView showAll() {
         return new AllFigureView(figureStorageService.findAllFigures());
     }
 
@@ -50,7 +52,7 @@ public class FigureResource {
 
     @Timed
     @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(APPLICATION_FORM_URLENCODED)
     public Response addNewFigure(@FormParam("url") String url) {
         Figure uploaded = figureUploader.fromLink(url);
         return redirectToMemeGeneration(uploaded);
@@ -72,7 +74,7 @@ public class FigureResource {
     @Timed
     @POST
     @Path("/fromDisk")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Consumes(MULTIPART_FORM_DATA)
     public Response addNewFigureFromDisk(@FormDataParam("file") InputStream fileInputStream,
                                          @FormDataParam("file") FormDataBodyPart bodyPart) {
         Figure uploaded = figureUploader.fromDisk(fileInputStream, bodyPart.getMediaType()
