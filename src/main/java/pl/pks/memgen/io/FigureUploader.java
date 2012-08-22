@@ -30,8 +30,8 @@ public class FigureUploader {
             return persist(uploadedImage);
 
         } catch (IllegalArgumentException e) {
-            LOG.error(e, "Could not process {}", url);
-            throw new ImageDownloadException();
+            LOG.error(e.getMessage(), "Could not process {}", url);
+            throw new ImageUploadException();
         }
     }
 
@@ -41,7 +41,7 @@ public class FigureUploader {
             return persist(uploadedImage);
         } catch (IllegalArgumentException e) {
             LOG.error(e, "Could not download the file from a disk");
-            throw new ImageDownloadException();
+            throw new ImageUploadException();
         }
     }
 

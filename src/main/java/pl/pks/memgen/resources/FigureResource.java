@@ -1,7 +1,8 @@
 package pl.pks.memgen.resources;
 
+import static javax.ws.rs.core.Response.seeOther;
+import static javax.ws.rs.core.UriBuilder.fromResource;
 import java.io.InputStream;
-import java.net.URI;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -10,11 +11,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.db.StorageService;
 import pl.pks.memgen.io.FigureUploader;
-import pl.pks.memgen.io.ImageDownloadException;
 import pl.pks.memgen.views.figure.AllFigureView;
 import pl.pks.memgen.views.figure.InvalidFigureView;
 import pl.pks.memgen.views.figure.NewFigureFromDisk;
@@ -53,23 +52,14 @@ public class FigureResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response addNewFigure(@FormParam("url") String url) {
-        try {
-            Figure uploaded = figureUploader.fromLink(url);
-            return Response.seeOther(
-                redirectToMemeGeneration(uploaded))
-                .build();
-        } catch (ImageDownloadException e) {
-            return redirectToErrorPage();
-        }
+        Figure uploaded = figureUploader.fromLink(url);
+        return redirectToMemeGeneration(uploaded);
 
     }
 
-    private URI redirectToMemeGeneration(Figure uploaded) {
-        return UriBuilder.fromResource(MemeResource.class).path("new/{id}").build(uploaded.getId());
-    }
-
-    private Response redirectToErrorPage() {
-        return Response.seeOther(UriBuilder.fromPath("/figure/invalid").build()).build();
+    private Response redirectToMemeGeneration(Figure uploaded) {
+        return seeOther(fromResource(MemeResource.class).path("new/{id}").build(uploaded.getId()))
+            .build();
     }
 
     @Timed
@@ -85,14 +75,9 @@ public class FigureResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response addNewFigureFromDisk(@FormDataParam("file") InputStream fileInputStream,
                                          @FormDataParam("file") FormDataBodyPart bodyPart) {
-        try {
-            Figure uploaded = figureUploader.fromDisk(fileInputStream, bodyPart.getMediaType()
-                .toString());
-            return Response.seeOther(redirectToMemeGeneration(uploaded))
-                .build();
-        } catch (ImageDownloadException e) {
-            return redirectToErrorPage();
-        }
+        Figure uploaded = figureUploader.fromDisk(fileInputStream, bodyPart.getMediaType()
+            .toString());
+        return redirectToMemeGeneration(uploaded);
     }
 
     @GET

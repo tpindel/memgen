@@ -1,4 +1,4 @@
-package pl.pks.memgen.memgenerator;
+package pl.pks.memgen.generator.transformer;
 
 import java.io.InputStream;
 import java.io.OutputStream;

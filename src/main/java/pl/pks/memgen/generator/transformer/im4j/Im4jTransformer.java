@@ -1,4 +1,4 @@
-package pl.pks.memgen.memgenerator.im4j;
+package pl.pks.memgen.generator.transformer.im4j;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +8,8 @@ import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
 import org.im4java.process.Pipe;
 import pl.pks.memgen.api.Meme;
-import pl.pks.memgen.memgenerator.FigureTransformer;
+import pl.pks.memgen.generator.transformer.FigureTransformer;
+import pl.pks.memgen.generator.transformer.TransformerException;
 
 public class Im4jTransformer implements FigureTransformer {
 
@@ -23,7 +24,7 @@ public class Im4jTransformer implements FigureTransformer {
         try {
             cmd.run(operation);
         } catch (IOException | InterruptedException | IM4JavaException e) {
-            throw new Im4jTransformException(e);
+            throw new TransformerException(e);
         }
     }
 

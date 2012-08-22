@@ -7,14 +7,16 @@ import pl.pks.memgen.db.StorageService;
 import pl.pks.memgen.db.StorageStrategy;
 import pl.pks.memgen.db.UnderscoreStorageStrategy;
 import pl.pks.memgen.db.UrlResolver;
+import pl.pks.memgen.generator.Generator;
+import pl.pks.memgen.generator.transformer.FigureTransformer;
+import pl.pks.memgen.generator.transformer.im4j.Im4jTransformer;
 import pl.pks.memgen.health.PlaceholderHealthCheck;
 import pl.pks.memgen.io.FigureUploader;
 import pl.pks.memgen.io.ImageDownloader;
 import pl.pks.memgen.io.processor.ImageProcessorFactory;
-import pl.pks.memgen.memgenerator.FigureTransformer;
-import pl.pks.memgen.memgenerator.MemGenerator;
-import pl.pks.memgen.memgenerator.im4j.Im4jTransformer;
 import pl.pks.memgen.resources.FigureResource;
+import pl.pks.memgen.resources.GeneratorExceptionMapper;
+import pl.pks.memgen.resources.ImageUploadExceptionMapper;
 import pl.pks.memgen.resources.MemeResource;
 import pl.pks.memgen.resources.RootResource;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -54,10 +56,12 @@ public class MemGenService extends Service<MemGenConfiguration> {
         FigureUploader figureUploader = new FigureUploader(storageService, imageProcessorFactory.create(),
             new ImageDownloader());
         FigureTransformer figureTransformer = new Im4jTransformer();
-        MemGenerator memGenerator = new MemGenerator(figureDownloader, storageService, figureTransformer);
+        Generator memGenerator = new Generator(figureDownloader, storageService, figureTransformer);
         env.addResource(new MemeResource(storageService, memGenerator));
         env.addResource(new FigureResource(storageService, figureUploader));
         env.addResource(new RootResource());
+        env.addProvider(ImageUploadExceptionMapper.class);
+        env.addProvider(GeneratorExceptionMapper.class);
         env.addHealthCheck(new PlaceholderHealthCheck());
     }
 

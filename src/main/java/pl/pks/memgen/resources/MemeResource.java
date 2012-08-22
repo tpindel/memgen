@@ -13,19 +13,21 @@ import javax.ws.rs.core.UriBuilder;
 import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.api.Meme;
 import pl.pks.memgen.db.StorageService;
-import pl.pks.memgen.memgenerator.MemGenerator;
+import pl.pks.memgen.generator.Generator;
 import pl.pks.memgen.views.meme.AllMemeView;
+import pl.pks.memgen.views.meme.ErrorView;
 import pl.pks.memgen.views.meme.GeneratedMemeView;
 import pl.pks.memgen.views.meme.NewMemeView;
+import com.yammer.dropwizard.views.View;
 import com.yammer.metrics.annotation.Timed;
 
 @Path("/meme")
 public class MemeResource {
 
     private final StorageService storageService;
-    private final MemGenerator memGenerator;
+    private final Generator memGenerator;
 
-    public MemeResource(StorageService storageService, MemGenerator memGenerator) {
+    public MemeResource(StorageService storageService, Generator memGenerator) {
         this.storageService = storageService;
         this.memGenerator = memGenerator;
     }
@@ -59,5 +61,11 @@ public class MemeResource {
     @GET
     public AllMemeView show() {
         return new AllMemeView(storageService.findAllMemes());
+    }
+
+    @GET
+    @Path("/error")
+    public View showErrorMessage() {
+        return new ErrorView();
     }
 }

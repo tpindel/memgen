@@ -14,7 +14,7 @@ public class ContentLengthHandler extends AbstractImageHandler {
 
     @Override
     public UploadedImage handleImage(UploadedImage uploadedImage) {
-        checkArgument(uploadedImage.getContentLength() <= limit, "Too big content length");
+        checkArgument(uploadedImage.getContentLength() <= limit, "Content exceeds the limit");
         return nextImageHandler.handleImage(uploadedImage);
     }
 

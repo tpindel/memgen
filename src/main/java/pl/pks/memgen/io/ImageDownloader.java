@@ -16,7 +16,7 @@ public class ImageDownloader {
             return uc.getInputStream();
         } catch (IOException e) {
             LOG.error(e, "Could not get an input stream");
-            throw new ImageDownloadException();
+            throw new ImageUploadException();
         }
     }
 
@@ -38,7 +38,7 @@ public class ImageDownloader {
             return uc;
         } catch (IOException e) {
             LOG.error(e, "Could not setup the connection for {}", imageUrl);
-            throw new ImageDownloadException();
+            throw new ImageUploadException();
         }
     }
 }
