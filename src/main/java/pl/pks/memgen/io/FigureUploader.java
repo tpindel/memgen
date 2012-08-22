@@ -1,5 +1,6 @@
 package pl.pks.memgen.io;
 
+import java.io.IOException;
 import java.io.InputStream;
 import pl.pks.memgen.api.Figure;
 import pl.pks.memgen.db.StorageService;
@@ -29,7 +30,7 @@ public class FigureUploader {
             UploadedImage uploadedImage = new UploadedImage(contentType, contentLength, dataInputStream);
             return persist(uploadedImage);
 
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IOException e) {
             LOG.error(e.getMessage(), "Could not process {}", url);
             throw new ImageUploadException();
         }
