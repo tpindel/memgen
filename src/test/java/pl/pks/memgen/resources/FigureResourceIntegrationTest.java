@@ -1,7 +1,7 @@
 package pl.pks.memgen.resources;
 
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA_TYPE;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
