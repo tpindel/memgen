@@ -20,7 +20,7 @@
 		<com.sun.jersey.contribs.jersey-multipart.version>1.13</com.sun.jersey.contribs.jersey-multipart.version>
 
 		<maven-compiler-plugin.version>2.4</maven-compiler-plugin.version>
-		<maven-shade-plugin.version>1.6</maven-shade-plugin.version>
+		<maven-shade-plugin.version>1.7.1</maven-shade-plugin.version>
 
 		<commons-io.version>2.4</commons-io.version>
 	</properties>
