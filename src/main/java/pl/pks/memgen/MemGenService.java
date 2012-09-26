@@ -40,23 +40,27 @@ public class MemGenService extends Service<MemGenConfiguration> {
 
     @Override
     protected void initialize(MemGenConfiguration conf, Environment env) throws Exception {
+        // configuration
         StorageConfiguration storageConfiguration = conf.getStorage();
         UploadConfiguration uploadConfiguration = conf.getUpload();
-
+        // storage
         AmazonS3Client amazonS3Client = initializeAmazonS3Client(storageConfiguration);
-        ImageDownloader figureDownloader = new ImageDownloader();
-        ImageProcessorFactory imageProcessorFactory = new ImageProcessorFactory(uploadConfiguration);
-
         IdGenerator idGenerator = new IdGenerator();
         NameResolver nameResolver = new NameResolver(idGenerator);
         UrlResolver urlResolver = new UrlResolver();
         StorageStrategy storageStrategy = new UnderscoreStorageStrategy(nameResolver, urlResolver);
         StorageService storageService = new AmazonStorageService(amazonS3Client, storageStrategy, storageConfiguration);
-
+        // middleware - image uploading
+        ImageDownloader imageDownloader = new ImageDownloader();
+        ImageProcessorFactory imageProcessorFactory = new ImageProcessorFactory(uploadConfiguration);
         FigureUploader figureUploader = new FigureUploader(storageService, imageProcessorFactory.create(),
             new ImageDownloader());
+
+        // middleware - trasnforming
         FigureTransformer figureTransformer = new Im4jTransformer();
-        Generator memGenerator = new Generator(figureDownloader, storageService, figureTransformer);
+        Generator memGenerator = new Generator(imageDownloader, storageService, figureTransformer);
+
+        // web services
         env.addResource(new MemeResource(storageService, memGenerator));
         env.addResource(new FigureResource(storageService, figureUploader));
         env.addResource(new RootResource());
